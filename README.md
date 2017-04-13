@@ -1,12 +1,22 @@
+# AnTu-photo
+
+## abstract
+
+AnTu-photo sorts pictures by time.
+
+This is a quick wrapper around the [ExifTool by Phil Harvey](http://www.sno.phy.queensu.ca/~phil/exiftool/). It corrects the timestamps of pictures, if needed, and then sorts the files in a directory structure based on the creation time.
+
+It also brings some simple shell scripts which are more intuitive than the complex exiftool parameters.
+
 ## antu-sortphotos.bash
 
-A quick wrapper around the 'exiftool' tool for my preferred directory
+This moves
 
-  * moves movies from     `~/Pictures/INBOX/` and subfolders to `~/Movies/yyyy/yyyy-mm-dd/`
-  * moves movies from     `~/Movies/`                        to `~/Movies/yyyy/yyyy-mm-dd/`
-  * moves raw images from `~/Pictures/INBOX/` and subfolders to `~/Pictures/RAW/yyyy/yyyy-mm-dd/`
-  * moves edited images from `~/Pictures/INBOX/` and subfolders to `~/Pictures/edit/yyyy/yyyy-mm-dd/`
-  * moves photos from     `~/Pictures/INBOX/` and subfolders to `~/Pictures/sorted/yyyy/yyyy-mm-dd/`
+  * movies from     `~/Pictures/INBOX/` and subfolders to `~/Movies/yyyy/yyyy-mm-dd/`
+  * movies from     `~/Movies/`                        to `~/Movies/yyyy/yyyy-mm-dd/`
+  * raw images from `~/Pictures/INBOX/` and subfolders to `~/Pictures/RAW/yyyy/yyyy-mm-dd/`
+  * edited images from `~/Pictures/INBOX/` and subfolders to `~/Pictures/edit/yyyy/yyyy-mm-dd/`
+  * photos from     `~/Pictures/INBOX/` and subfolders to `~/Pictures/sorted/yyyy/yyyy-mm-dd/`
 
 Movies are sorted first. They are recognised by their file extension:
 
