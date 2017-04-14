@@ -1,12 +1,14 @@
 # AnTu-photo
 
-## abstract
-
 AnTu-photo sorts pictures by time.
 
-This is a quick wrapper around the [ExifTool by Phil Harvey](http://www.sno.phy.queensu.ca/~phil/exiftool/). It corrects the timestamps of pictures, if needed, and then sorts the files in a directory structure based on the creation time.
+This is a quick wrapper around the [ExifTool by Phil Harvey](http://www.sno.phy.queensu.ca/~phil/exiftool/). It corrects the timestamps of pictures, if needed, and then sorts the files in a directory structure based on the creation time, like
+
+    ~/Pictures/YYYY/YYYY-MM-DD/YYYYMMDD-hhmmss.jpg
 
 It also brings some simple shell scripts which are more intuitive than the complex exiftool parameters.
+
+
 
 ## antu-sortphotos.bash
 
@@ -43,3 +45,50 @@ suffixed with a an incremental number: `YYYYMMDD-hhmmss_n.xxx`.
 In a second invocation, with option `--stage2`, they will be resorted
 
   * moves photos from     `~/Pictures/sorted/` and subfolders to `~/Pictures/yyyy/yyyy-mm-dd/`
+
+
+
+## Helper Scripts
+
+
+### photo-check-times.bash
+
+identify photos with unlogical time stamps
+
+
+###	photo-correct-times.bash
+
+create a list of commands to correct date and time stamps
+
+
+### photo-explain-times.bash
+
+explain output of photo-check-times.bash
+
+
+### photo-restore-original.bash
+
+restore from `_original` files as by ExifTool
+
+
+### photo-set-times.bash
+
+set date and time to a fixed date
+
+
+### photo-shift-times.bash
+
+shift date and time by a fixed number of seconds
+
+
+### photo-sort.bash
+
+recursively rename and sort photos by creation date
+
+
+## tested on
+
+| OS            | bash      | perl      | ExifTool |
+|---------------|-----------|-----------|----------|
+| macOS 10.12.4 | 3.2.57(1) | (v5.18.2) | 10.48    |
+

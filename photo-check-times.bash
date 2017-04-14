@@ -1,17 +1,33 @@
 #!/bin/bash
-# photo-check-times.bash - identify photos with unlogical time stamps
+#
+# NAME
+#	photo-check-times.bash - identify photos with unlogical time stamps
 # 
-# Uses EXIF-Tool to identify the following timestamps. It is expected that they
-# are identical or increasing in this order. If this is not the case, the file-
-# name and its timestamps are returned.
-# CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate ≤ FileInodeChangeDate ≤ FileAccessDate
+# SYNOPSIS
+#	photo-check-times.bash [DIRNAME]
 #
-# Ouput a space-separated list of with times as seconds since 1 Jan 01:00:00 1970
-# SourceFile minDateLong minDate CreateDate DateTimeOriginal ModifyDate FileModifyDate FileInodeChangeDate FileAccessDate
+# DESCRIPTION
+#	Uses EXIF-Tool to identify the following timestamps. It is expected that
+#	they are identical or increasing in this order. If this is not the case, the
+#	file-name, the minimun timestamp value and all the other timestamps are
+#	returned.
+#		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
+#		≤ FileInodeChangeDate ≤ FileAccessDate
 #
-# The output 
-# USAGE
-#   photo-check-times.bash [DIRNAME]
+#	Ouput a space-separated list of with times as seconds since
+#	1970-Jan-01 00:00:00
+#		SourceFile minDateLong minDate CreateDate DateTimeOriginal ModifyDate\
+#		FileModifyDate FileInodeChangeDate FileAccessDate
+#
+# FILES
+#	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
+#
+# AUTHOR
+#	@author     Andreas Tusche
+#	@copyright  (c) 2017, Andreas Tusche 
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
 # when       who  what
 # 2017-04-07 AnTu initial release

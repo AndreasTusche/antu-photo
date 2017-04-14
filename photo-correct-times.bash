@@ -1,16 +1,29 @@
 #!/bin/bash
-# photo-correct-times.bash - create a list of commands to correct date and time stamps
 #
-# Input is a comma-separated list of times as seconds since 1970-Jan-01 01:00:00
-# SourceFile minDateLong minDate CreateDate DateTimeOriginal ModifyDate FileModifyDate FileInodeChangeDate FileAccessDate
-# Only the first and third entry (SourceFile and minDate) are actually used
+# NAME
+#	photo-correct-times.bash - create a list of commands to correct date and time stamps
 #
-# USAGE
-#   photo-correct-times.bash FILENAME
+# SYNOPSIS
+#	photo-correct-times.bash FILENAME
 #	photo-check-times.bash | photo-correct-times.bash
-# or to directly execute
 #   photo-correct-times.bash FILENAME | bash
 #	photo-check-times.bash | photo-correct-times.bash | bash
+#
+# DESCRIPTION
+#	Input is a comma-separated list of times as seconds since 1970-Jan-01
+#	00:00:00.
+#		SourceFile minDateLong minDate CreateDate DateTimeOriginal ModifyDate\
+#		FileModifyDate FileInodeChangeDate FileAccessDate
+#
+#	From that list only the first and third entry (SourceFile and minDate) are
+#	actually used for time calculations.
+#
+# AUTHOR
+#	@author     Andreas Tusche
+#	@copyright  (c) 2017, Andreas Tusche 
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
 # when       who  what
 # 2017-04-08 AnTu initial release
