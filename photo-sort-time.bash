@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # NAME
-#   photo-sort.bash - recursivly rename and sort photos by creation date
+#   photo-sort-time.bash - recursivly rename and sort photos by creation date
 # 
 # SYNOPSIS
-#   photo-sort.bash [INDIR [OUTDIR]]
+#   photo-sort-time.bash [INDIR [OUTDIR]]
 #
 # DESCRIPTION
 #   This moves files from     ~/Pictures/INBOX/ and subfolders
@@ -42,4 +42,10 @@ if [ -e ./antu-photo.cfg ]; then . ./antu-photo.cfg; fi
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
 
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -m -r -v "-FileName<FileModifyDate" "-FileName<ModifyDate" "-FileName<DateTimeOriginal" "-FileName<CreateDate" -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+c.%%le" "${INDIR}"
+exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -m -r -v \
+    -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+c.%%le"\
+    "-FileName<FileModifyDate"\
+    "-FileName<ModifyDate"\
+    "-FileName<DateTimeOriginal"\
+    "-FileName<CreateDate"\
+    "${INDIR}"

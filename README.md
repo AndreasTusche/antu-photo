@@ -81,7 +81,11 @@ set date and time to a fixed date
 shift date and time by a fixed number of seconds
 
 
-### photo-sort.bash
+### photo-sort-time-model.bash
+
+recursively rename and sort photos by creation date and camera model
+
+### photo-sort-time.bash
 
 recursively rename and sort photos by creation date
 

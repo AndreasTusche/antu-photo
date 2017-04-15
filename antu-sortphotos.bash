@@ -77,7 +77,7 @@
 # config
 CMD_checktimes=~/Develop/antu-photo/photo-check-times.bash
 CMD_correcttim=~/Develop/antu-photo/photo-correct-times.bash
-CMD_sortphotos=~/Develop/antu-photo/photo-sort.bash
+CMD_sortphotos=~/Develop/antu-photo/photo-sort-time.bash
 
 DIR_EDT=~/Pictures/edit/
 DIR_SRC=~/Pictures/INBOX/

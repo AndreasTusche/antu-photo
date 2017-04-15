@@ -18,7 +18,7 @@
 #       FileModifyDate
 #
 #   It is recommended to then move and rename the modified files using
-#       photo-sort.bash 
+#       photo-sort-time.bash 
 #
 # FILES
 #	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
