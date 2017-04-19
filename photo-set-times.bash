@@ -11,7 +11,7 @@
 #   This sets the date and time stamps to the given date for one picture file or
 #   for all picture files in the given directory (not recursive).
 #
-# Following tmestamps are modified if they existed before:
+# Following timestamps are modified if they existed before:
 #   CreateDate
 #   DateTimeOriginal
 #   SonyDateTime
@@ -29,7 +29,7 @@
 #	@(#) $Id: . Exp $
 #
 # when       who  what
-# 2017-04-11 AnTu initial release
+# 2017-04-11 AnTu created
 
 T="${1//-/:} ${2//-/:}"
 DIRNAME="$( readlink -f "${3:-$(pwd)}" )"

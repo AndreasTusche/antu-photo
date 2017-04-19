@@ -10,7 +10,7 @@
 #   This shifts the date and time stamps by the given number of seconds for one
 #   picture file or for all pictures in the given directory (not recursive).
 #
-#   Following tmestamps are modified if they existed before:
+#   Following timestamps are modified if they existed before:
 #       CreateDate
 #       DateTimeOriginal
 #       SonyDateTime
@@ -31,7 +31,7 @@
 #	@(#) $Id: . Exp $
 #
 # when       who  what
-# 2017-04-14 AnTu initial release
+# 2017-04-14 AnTu created
 
 T=$(bc <<< 1*0${1//[^-0-9]/})          # make sure we have a number
 DIRNAME="$( readlink -f "${2:-$(pwd)}" )"

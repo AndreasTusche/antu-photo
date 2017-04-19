@@ -1,19 +1,20 @@
 #!/bin/bash
 #
 # NAME
-#   photo-sort-time-model.bash - recursivly rename and sort photos by creation date and camera model
+#   photo-sort-time-frame.bash - recursivly rename and sort photos by creation date and frame number
 # 
 # SYNOPSIS
-#   photo-sort-time-model.bash [INDIR [OUTDIR]]
+#   photo-sort-time-frame.bash [INDIR [OUTDIR]]
 #
 # DESCRIPTION
 #   This moves files from     present directory and subfolders
 #		             to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
 #
-#	Images and RAW images are renamed to YYYYMMDD-hhmmss-model.xxx, based on
-#   their CreateDate and Camera Model Name. If two pictures were taken at the
-#   same second by the same camera, the filename will be suffixed with a an
-#   incremental number: YYYYMMDD-hhmmss-model_n.xxx .
+#	Images and RAW images are renamed to YYYYMMDD-hhmmss_ffff.xxx, based on
+#   their CreateDate and Frame Number. Frame Numbers usually only exist where an
+#   analouge series of photos was digitalised. If two pictures still end up in
+#   the same file-name, it will then be suffixed with a an incremental number:
+#   YYYYMMDD-hhmmss_ffff_n.xxx .
 #
 # OPTIONS
 #   INDIR  defaults to the present working directory
@@ -30,23 +31,23 @@
 #	@(#) $Id: . Exp $
 #
 # when       who  what
-# 2017-04-14 AnTu created
+# 2017-04-15 AnTu created
 
 # config
 DIR_PIC=~/Pictures/sorted/
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg"  2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
  
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
 
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -if '$Model' -m -r -v \
+exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -if '$FrameNumber' -m -r -v \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
-    '-FileName<${FileModifyDate}-${Model;s/ /_/g;s/__+/-/g}%+c.${FileTypeExtension}'\
-    '-FileName<${ModifyDate}-${Model;s/ /_/g;s/__+/-/g}%+c.${FileTypeExtension}'\
-    '-FileName<${DateTimeOriginal}-${Model;s/ /_/g;s/__+/-/g}%+c.${FileTypeExtension}'\
-    '-FileName<${CreateDate}-${Model;s/ /_/g;s/__+/-/g}%+c.${FileTypeExtension}'\
+    '-FileName<${FileModifyDate}_${FrameNumber}%+c.${FileTypeExtension}'\
+    '-FileName<${ModifyDate}_${FrameNumber}%+c.${FileTypeExtension}'\
+    '-FileName<${DateTimeOriginal}_${FrameNumber}%+c.${FileTypeExtension}'\
+    '-FileName<${CreateDate}_${FrameNumber}%+c.${FileTypeExtension}'\
     "${INDIR}"
 exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -m -r -v \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+c.%%le"\

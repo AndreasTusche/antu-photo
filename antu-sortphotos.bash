@@ -75,9 +75,9 @@
 # 2017-04-09 AnTu got rid of python script, now using exiftool directly
 
 # config
-CMD_checktimes=~/Develop/antu-photo/photo-check-times.bash
-CMD_correcttim=~/Develop/antu-photo/photo-correct-times.bash
-CMD_sortphotos=~/Develop/antu-photo/photo-sort-time.bash
+CMD_correcttim=~/Develop/antu-photo/photo-fix-times.bash
+CMD_extractgps=~/Develop/antu-photo/photo-extract-gps.bash
+CMD_sortphotos=~/Develop/antu-photo/photo-sort-time-frame.bash
 
 DIR_EDT=~/Pictures/edit/
 DIR_SRC=~/Pictures/INBOX/
@@ -133,7 +133,7 @@ if [ "$1" != "--stage2" ] ; then
 		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
 	done	
 
-	$CMD_checktimes "$DIR_TMP" | $CMD_correcttim | bash
+	$CMD_correcttim "$DIR_TMP"
 	$CMD_sortphotos "$DIR_TMP" "$DIR_MOV"
 
 	# then move and rename RAW files
@@ -147,7 +147,7 @@ if [ "$1" != "--stage2" ] ; then
 		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
 	done
 
-	$CMD_checktimes "$DIR_TMP" | $CMD_correcttim | bash
+	$CMD_correcttim "$DIR_TMP"
 	$CMD_sortphotos "$DIR_TMP" "$DIR_RAW"
 
 
@@ -162,16 +162,28 @@ if [ "$1" != "--stage2" ] ; then
 		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
 	done
 
-	$CMD_checktimes "$DIR_TMP" | $CMD_correcttim | bash
+	$CMD_correcttim "$DIR_TMP"
 	$CMD_sortphotos "$DIR_TMP" "$DIR_EDT"
 
 fi
 
 # move and rename all picture files 
 echo -e "\nPictures ...\n--------------------"
-$CMD_checktimes "$DIR_SRC" | $CMD_correcttim | bash
+$CMD_correcttim "$DIR_SRC"
 $CMD_sortphotos "$DIR_SRC" "$DIR_PIC"
 
+if [ "$1" != "--stage2" ] ; then
+	for d in ${DIR_PIC%/}/2*; do
+		for dd in "${d%/}"/2*; do
+			if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
+			    $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
+			fi
+		done
+	done
+fi 
+
+## one-liner for manual gps extract:
+# for d in ~/Pictures/2*; do for dd in "${d%/}"/2*; do if [[ ! -e "${dd%/}/gps.gpx" ]]; then ~/Develop/antu-photo/photo-extract-gps.bash "${dd}" >"${dd%/}/gps.gpx"; fi; done; done
 
 # finally clean up
 rm -d "$DIR_TMP"

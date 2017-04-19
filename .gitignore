@@ -1,5 +1,8 @@
 
 .DS_Store
 
+photo-check-times.bash
+photo-correct-times.bash
+photo-explain-times.bash
 photo-correct-times-and-move.bash
 todo.txt

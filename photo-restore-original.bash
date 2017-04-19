@@ -20,7 +20,7 @@
 #	@(#) $Id: . Exp $
 #
 # when       who  what
-# 2017-04-08 AnTu initial release
+# 2017-04-08 AnTu created
 
 DIRNAME="${1:-$( readlink -f "${1:-$(pwd)}" )}"
 

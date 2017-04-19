@@ -29,15 +29,13 @@
 #	@(#) $Id: . Exp $
 #
 # when       who  what
-# 2017-04-09 AnTu initial release
+# 2017-04-09 AnTu created
 
 # config
 DIR_PIC=~/Pictures/sorted/
 
 # --- nothing beyond this line needs configuration -----------------------------
-
-if [ -e "${0%/*}/antu-photo.cfg" ]; then . "${0%/*}/antu-photo.cfg"; fi
-if [ -e ./antu-photo.cfg ]; then . ./antu-photo.cfg; fi
+for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg"  2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
  
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
