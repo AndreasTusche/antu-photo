@@ -40,4 +40,7 @@ case "$#" in
     *) echo "USAGE: ${0##*/} YYYY:MM:DD hh:mm:ss [FILENAME|DIRNAME]"; exit 1;;
 esac
 
-exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts -m -overwrite_original_in_place -q -CreateDate="$T" -DateTimeOriginal="$T" -SonyDateTime="$T" -ModifyDate="$T" -FileModifyDate="$T" $DIRNAME
+exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
+    -m -overwrite_original_in_place -progress: -q \
+    -CreateDate="$T" -DateTimeOriginal="$T" -SonyDateTime="$T" -ModifyDate="$T" -FileModifyDate="$T" \
+    $DIRNAME

@@ -15,9 +15,10 @@ The usual workflow is like this:
 3) check for corrupted other times (e.g. CreateDate > ModifyDate) and set them to the minimum date found
 4) rename by time and frame number (if exists)
 5) sort files into a directory structure based on the date
+    - at this point the newly processed pictures are in `~/Pictures/sorted/yyyy/yyyy-mm-dd/` for review. Here we may revisit the gps.pgx file and the use `photo-set.gps` to set the GPS coordinates of the other files.
+6) sort files into the final directory structure based on the date (using option `--stage2`)
 
-
-## antu-sortphotos.bash
+## antu-sortphotos
 
 This moves
 
@@ -55,16 +56,16 @@ In a second invocation, with option `--stage2`, they will be resorted
 
 ## Helper Scripts
 
-### photo-extraxt-gps
+### photo-extract-gps
 
 This extracts GPS geo-location information from files in the given directory and subfolders and writes the result in GPX format to stdout.
 
-    photo-extraxt-gps.bash DIRNAME
+    photo-extract-gps.bash DIRNAME
 
 
 ### photo-fix-times
 
-Uses EXIF-Tool to identify the following timestamps. It is expected that they are identical or increasing in this order. If this is not the case, the timestamps are set to the found minimum.
+Uses ExifTool to identify the following timestamps. It is expected that they are identical or increasing in this order. If this is not the case, the timestamps are set to the found minimum.
 
     CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate ≤ FileInodeChangeDate ≤ FileAccessDate
 
@@ -219,6 +220,6 @@ Am example ExifTool print format file `gpx.fmt`for generating GPX track log that
 
 ## tested on
 
-| OS            | awk       | bash      | perl      | ExifTool |
-|---------------|-----------|-----------|-----------|----------|
-| macOS 10.12.4 | GNU 4.1.1 | 3.2.57(1) | (v5.18.2) | 10.48    |
+| OS            | awk       | bash      | perl   | ExifTool |
+|---------------|-----------|-----------|--------|----------|
+| macOS 10.12.4 | GNU 4.1.1 | 3.2.57(1) | 5.18.2 | 10.48    |

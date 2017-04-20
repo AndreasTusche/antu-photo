@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # NAME
-#   photo-extraxt-gps.bash - recursively extract GPS coordinates from image files
+#   photo-extract-gps.bash - recursively extract GPS coordinates from image files
 # 
 # SYNOPSIS
-#   photo-extraxt-gps.bash DIRNAME
+#   photo-extract-gps.bash DIRNAME
 #
 # DESCRIPTION
 #   This extracts GPS geo-location information from files in the given
@@ -36,6 +36,6 @@ for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 
 exiftool --ext DS_Store --ext gpx --ext localized -i SYMLINKS \
-    -d %Y-%m-%dT%H:%M:%SZ -if '$GPSDateStamp' -fileOrder gpsdatetime -m -r -p ${GPS_FMT} \
+    -d %Y-%m-%dT%H:%M:%SZ -if '$GPSDateStamp' -fileOrder gpsdatetime -m -r -p ${GPS_FMT} -progress: -q \
     "${INDIR}"
     

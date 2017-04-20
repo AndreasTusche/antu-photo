@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # NAME
 #   photo-set-gps.bash - set GPS coordinates in image files
@@ -50,10 +50,10 @@ fi
 if [[ -d "${INDIR}" ]]; then
     cd "${INDIR}"
 fi
-opt=$( exiftool -i SYMLINKS -if '$gpsdatetime' -fileOrder gpsdatetime -m -p '-geosync=$Filename ' -q "${INDIR}" )
+opt=$( exiftool -i SYMLINKS -if '$gpsdatetime' -fileOrder gpsdatetime -m -p '-geosync=$Filename ' -progress: -q "${INDIR}" )
 
 # Step 3: set GPS coordiantes to files that don't have one yet, allow 3 hours
 #         between way-points
 exiftool --ext DS_Store --ext localized -i SYMLINKS \
-    -api GeoMaxIntSecs=10800 -geotag "${INDIR%/}/${GPS_LOG}" $opt -m -P -wm cg \
+    -api GeoMaxIntSecs=10800 -geotag "${INDIR%/}/${GPS_LOG}" $opt -m -P -progress: -q -wm cg \
     "${INDIR}"

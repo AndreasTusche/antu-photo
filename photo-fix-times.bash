@@ -7,7 +7,7 @@
 #	photo-fix-times.bash [DIRNAME]
 #
 # DESCRIPTION
-#	Uses EXIF-Tool to identify the following timestamps. It is expected that
+#	Uses ExifTool to identify the following timestamps. It is expected that
 #	they are identical or increasing in this order. If this is not the case, the
 #	timestamps are set to the found minimum.
 #		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
@@ -40,9 +40,10 @@ DIRNAME="$( readlink -f "${1:-$(pwd)}" )"
 # iPhone 5S delivers illegal date values; e.g.
 # GPSDateTime                     : 2015:08:233 23:15:05.72Z
 # Warning: PrintConv GPSDateTime: Day '233' out of range 1..31
+echo "... checking GPS times"
 
 IFS=,
-exiftool --ext DS_Store --ext localized -i SYMLINKS -csv -m -q -r \
+exiftool --ext DS_Store --ext localized -i SYMLINKS -csv -m -progress: -q -r \
     -if '$gpsdatetime' -GPSDateTime \
     "${DIRNAME%/}" | awk -v DEBUG=$DEBUG '
     BEGIN {
@@ -63,6 +64,7 @@ exiftool --ext DS_Store --ext localized -i SYMLINKS -csv -m -q -r \
 
 
 # II) check other timestamps
+echo "... checking time stamps"
 
 exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
     -GPSDateTime -CreateDate -DateTimeOriginal -ModifyDate -FileModifyDate -FileInodeChangeDate -FileAccessDate \
@@ -147,7 +149,7 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
     	}
     ' | while read file mindate x
     do
-        echo "DEBUG: $file  to  $mindate"
+        (($DEBUG)) && echo "DEBUG: $file  to  $mindate"
         exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
             -m -overwrite_original_in_place -q \
             -CreateDate="$mindate" -DateTimeOriginal="$mindate" -SonyDateTime="$mindate" -ModifyDate="$mindate" -FileModifyDate="$mindate" \

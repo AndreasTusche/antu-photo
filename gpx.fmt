@@ -8,7 +8,7 @@
 # DESCRIPTION
 #   Example ExifTool print format file for generating GPX track log that also
 #   includes a track-name and track-number based on the start time.
-#   Note: All input files must contain GPSLatitude and GPSLongitude.
+#   Only input files that contain GPSLatitude and GPSLongitude are considered.
 #
 # FILES
 #	Requires exiftool 8.10 or later
@@ -42,3 +42,4 @@
 #[TAIL]     </trkseg>
 #[TAIL] </trk>
 #[TAIL]</gpx>
+#[TAIL]

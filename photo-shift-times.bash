@@ -43,8 +43,14 @@ case "$#" in
 esac
 
 if [[ $T > 0 ]]; then
-    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts -m -overwrite_original_in_place -q -CreateDate+="::$T" -DateTimeOriginal+="::$T" -SonyDateTime+="::$T" -ModifyDate+="::$T" -FileModifyDate+="::$T" $DIRNAME
+    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
+        -m -overwrite_original_in_place -progress: -q \
+        -CreateDate+="::$T" -DateTimeOriginal+="::$T" -SonyDateTime+="::$T" -ModifyDate+="::$T" -FileModifyDate+="::$T" \
+        $DIRNAME
 else
     T=$(bc <<< -1*${T})                # make sure we have a positive number
-    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts -m -overwrite_original_in_place -q -CreateDate-="::$T" -DateTimeOriginal-="::$T" -SonyDateTime-="::$T" -ModifyDate-="::$T" -FileModifyDate-="::$T" $DIRNAME
+    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
+        -m -overwrite_original_in_place -progress: -q \
+        -CreateDate-="::$T" -DateTimeOriginal-="::$T" -SonyDateTime-="::$T" -ModifyDate-="::$T" -FileModifyDate-="::$T" \
+        $DIRNAME
 fi

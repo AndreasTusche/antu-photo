@@ -40,7 +40,7 @@ for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg"  2>/dev/null || source "
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
 
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -m -r -v \
+exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS -m -r -progress: -q \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+c.%%le"\
     "-FileName<FileModifyDate"\
     "-FileName<ModifyDate"\

@@ -173,10 +173,15 @@ $CMD_correcttim "$DIR_SRC"
 $CMD_sortphotos "$DIR_SRC" "$DIR_PIC"
 
 if [ "$1" != "--stage2" ] ; then
+	echo "... extracting GPS coordinates"
+	# assuming we have pictures from after the year 2000
 	for d in ${DIR_PIC%/}/2*; do
 		for dd in "${d%/}"/2*; do
 			if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
 			    $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
+				if [[ ! -s "${dd%/}/${GPS_LOG}" ]]; then
+					rm "${dd%/}/${GPS_LOG}"
+				fi
 			fi
 		done
 	done
