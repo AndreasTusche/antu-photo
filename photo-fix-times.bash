@@ -155,3 +155,4 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
             -AllDates="$mindate" -SonyDateTime="$mindate" -IFD1:ModifyDate="$mindate" -FileModifyDate="$mindate" \
             $file
     done
+    
