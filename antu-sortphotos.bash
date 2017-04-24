@@ -15,7 +15,7 @@
 #		                to       ~/Movies/YYYY/YYYY-MM-DD/
 #		* raw images    from     ~/Pictures/INBOX/ and subfolders
 #		                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
-#		* edited images from     ~/Pictures/INBOX/ and subfolders to
+#		* edited images from     ~/Pictures/INBOX/ and subfolders
 #		                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
 #		* photos        from     ~/Pictures/INBOX/ and subfolders
 #		                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
@@ -90,9 +90,7 @@ DIR_SRC_2=~/Pictures/sorted/
 DIR_PIC_2=~/Pictures/
 
 # --- nothing beyond this line needs configuration -----------------------------
-
-if [ -e "${0%/*}/antu-photo.cfg" ]; then . "${0%/*}/antu-photo.cfg"; fi
-if [ -e ./antu-photo.cfg ]; then . ./antu-photo.cfg; fi
+for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 
 if [ "$1" == "--stage2" ] ; then
 	DIR_SRC=$DIR_SRC_2
