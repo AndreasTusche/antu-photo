@@ -11,12 +11,13 @@
 #   This sets the date and time stamps to the given date for one picture file or
 #   for all picture files in the given directory (not recursive).
 #
-# Following timestamps are modified if they existed before:
-#   CreateDate
-#   DateTimeOriginal
-#   SonyDateTime
-#   ModifyDate
-#   FileModifyDate
+#   Following timestamps are modified if they existed before:
+#       CreateDate
+#       DateTimeOriginal
+#       FileModifyDate
+#       IFD1:ModifyDate
+#       ModifyDate
+#       SonyDateTime
 #
 # FILES
 #	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
@@ -42,5 +43,5 @@ esac
 
 exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
     -m -overwrite_original_in_place -progress: -q \
-    -CreateDate="$T" -DateTimeOriginal="$T" -SonyDateTime="$T" -ModifyDate="$T" -FileModifyDate="$T" \
+    -AllDates="$T" -SonyDateTime="$T" -IFD1:ModifyDate="$T" -FileModifyDate="$T" \
     $DIRNAME

@@ -44,6 +44,9 @@ INDIR="$( readlink -f "${1:-$(pwd)}" )"
 #         side-effect: this file will remain in the directory
 if [[ ! -e "${INDIR%/}/${GPS_LOG}" ]]; then
     $CMD_extractgps "${INDIR}"  >"${INDIR%/}/${GPS_LOG}"
+    if [[ ! -s "${INDIR%/}/${GPS_LOG}" ]]; then
+        rm "${INDIR%/}/${GPS_LOG}"
+    fi
 fi
 
 # Step 2: identify image names that can be taken as geo-sync reference
@@ -53,7 +56,7 @@ fi
 opt=$( exiftool -i SYMLINKS -if '$gpsdatetime' -fileOrder gpsdatetime -m -p '-geosync=$Filename ' -progress: -q "${INDIR}" )
 
 # Step 3: set GPS coordiantes to files that don't have one yet, allow 3 hours
-#         between way-points
+#         between track-points
 exiftool --ext DS_Store --ext localized -i SYMLINKS \
     -api GeoMaxIntSecs=10800 -geotag "${INDIR%/}/${GPS_LOG}" $opt -m -P -progress: -q -wm cg \
     "${INDIR}"

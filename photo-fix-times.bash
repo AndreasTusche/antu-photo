@@ -99,6 +99,7 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
 
     	0 < $F_GPSDateTime && $F_GPSDateTime < MAX && \
         ( $F_GPSDateTime != $F_CreateDate || $F_GPSDateTime != $F_DateTimeOriginal ) {
+            GPSdate=strftime("%Y %m %d", $F_GPSDateTime)
             GPSminutes=strftime("%M", $F_GPSDateTime)
             GPSseconds=strftime("%S", $F_GPSDateTime)
             GPStime_found = 1
@@ -132,7 +133,6 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
                 if (DEBUG) print "DEBUG: min(Time) (1) = " strftime("%Y %m %d %H %M %S", m) > "/dev/stderr"
 
                 MINminutes=strftime("%M", m)
-                MINseconds=strftime("%S", m)
                 
                 if (GPSminutes > 45 && MINminutes < 15 ) {
                     GPSminutes -= 60
@@ -140,7 +140,7 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
                     GPSminutes += 60
                 }
                 
-                m = mktime( strftime("%Y %m %d %H ", m) GPSminutes " " GPSseconds)
+                m = mktime( GPSdate " " strftime("%H ", m) GPSminutes " " GPSseconds)
 
                 if (DEBUG) print "DEBUG: min(Time) (2) = " strftime("%Y %m %d %H %M %S", m) > "/dev/stderr"
             }
@@ -152,6 +152,6 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
         (($DEBUG)) && echo "DEBUG: $file  to  $mindate"
         exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
             -m -overwrite_original_in_place -q \
-            -CreateDate="$mindate" -DateTimeOriginal="$mindate" -SonyDateTime="$mindate" -ModifyDate="$mindate" -FileModifyDate="$mindate" \
+            -AllDates="$mindate" -SonyDateTime="$mindate" -IFD1:ModifyDate="$mindate" -FileModifyDate="$mindate" \
             $file
     done
