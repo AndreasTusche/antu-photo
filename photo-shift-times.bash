@@ -14,6 +14,7 @@
 #       CreateDate
 #       DateTimeOriginal
 #       SonyDateTime
+#       SonyDateTime2
 #       ModifyDate
 #       FileModifyDate
 #
@@ -32,6 +33,7 @@
 #
 # when       who  what
 # 2017-04-14 AnTu created
+# 2017-05-06 AnTu added support for SonyDateTime2
 
 T=$(bc <<< 1*0${1//[^-0-9]/})          # make sure we have a number
 DIRNAME="$( readlink -f "${2:-$(pwd)}" )"
@@ -45,12 +47,12 @@ esac
 if [[ $T > 0 ]]; then
     exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
         -m -overwrite_original_in_place -progress: -q \
-        -AllDates+="::$T" -SonyDateTime+="::$T" -IFD1:ModifyDate+="::$T" -FileModifyDate+="::$T" \
+        -AllDates+="::$T" -SonyDateTime+="::$T" -SonyDateTime2+="::$T" -IFD1:ModifyDate+="::$T" -FileModifyDate+="::$T" \
         $DIRNAME
 else
     T=$(bc <<< -1*${T})                # make sure we have a positive number
     exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
         -m -overwrite_original_in_place -progress: -q \
-        -AllDates-="::$T" -SonyDateTime-="::$T" -IFD1:ModifyDate-="::$T" -FileModifyDate-="::$T" \
+        -AllDates-="::$T" -SonyDateTime-="::$T" -SonyDateTime2-="::$T" -IFD1:ModifyDate-="::$T" -FileModifyDate-="::$T" \
         $DIRNAME
 fi

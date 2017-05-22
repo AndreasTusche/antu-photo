@@ -10,8 +10,8 @@
 #	Uses ExifTool to identify the following timestamps. It is expected that
 #	they are identical or increasing in this order. If this is not the case, the
 #	timestamps are set to the found minimum.
-#		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
-#		≤ FileInodeChangeDate ≤ FileAccessDate
+#		CreateDate ≤ DateTimeOriginal ≤ SonyDateTime ≤ SonyDateTime2
+#       ≤ ModifyDate ≤ FileModifyDate ≤ FileInodeChangeDate ≤ FileAccessDate
 #
 #	If a GPS timestamp exists, it is trusted and the CreateDate and
 #	DateTimeOriginal values for minutes and seconds are set to those of the GPS
@@ -29,6 +29,7 @@
 #
 # when       who  what
 # 2017-04-18 AnTu created
+# 2017-05-06 AnTu added support for SonyDateTime and SonyDateTime2 
 
 # config
 DEBUG=0 # no debug output (0), somewhat verbose (1), more verbose (2)
@@ -67,7 +68,7 @@ exiftool --ext DS_Store --ext localized -i SYMLINKS -csv -m -progress: -q -r \
 echo "... checking time stamps"
 
 exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
-    -GPSDateTime -CreateDate -DateTimeOriginal -ModifyDate -FileModifyDate -FileInodeChangeDate -FileAccessDate \
+    -GPSDateTime -CreateDate -DateTimeOriginal -SonyDateTime -SonyDateTime2 -ModifyDate -FileModifyDate -FileInodeChangeDate -FileAccessDate \
     "${DIRNAME%/}" | awk -v DEBUG=$DEBUG '
     	BEGIN {
     			FS  = ","
@@ -76,10 +77,12 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
                 F_GPSDateTime         = 2
                 F_CreateDate          = 3
                 F_DateTimeOriginal    = 4
-                F_ModifyDate          = 5
-                F_FileModifyDate      = 6
-                F_FileInodeChangeDate = 7
-                F_FileAccessDate      = 8
+                F_SonyDateTime        = 5
+                F_SonyDateTime2       = 6
+                F_ModifyDate          = 7
+                F_FileModifyDate      = 8
+                F_FileInodeChangeDate = 9
+                F_FileAccessDate      = 10
     		}
     	
     	# first line in CSV 
@@ -95,7 +98,7 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
     	}
     	
     	# always trust GPS time but as the time-zone is usually different to the
-        # other time-stamps only use the minutes and seconds, if needed
+        # other time-stamps ignore the hour
 
     	0 < $F_GPSDateTime && $F_GPSDateTime < MAX && \
         ( $F_GPSDateTime != $F_CreateDate || $F_GPSDateTime != $F_DateTimeOriginal ) {
@@ -108,15 +111,28 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
     	
     	# check correct order of time-stamps, allow 2 seconds offset
 
-    	$F_CreateDate          > $F_DateTimeOriginal    + 2 || \
+        $F_CreateDate          > $F_DateTimeOriginal    + 2 || \
+        $F_CreateDate          > $F_SonyDateTime        + 2 || \
+        $F_CreateDate          > $F_SonyDateTime2       + 2 || \
         $F_CreateDate          > $F_ModifyDate          + 2 || \
         $F_CreateDate          > $F_FileModifyDate      + 2 || \
         $F_CreateDate          > $F_FileInodeChangeDate + 2 || \
         $F_CreateDate          > $F_FileAccessDate      + 2 || \
+        $F_DateTimeOriginal    > $F_SonyDateTime        + 2 || \
+        $F_DateTimeOriginal    > $F_SonyDateTime2       + 2 || \
         $F_DateTimeOriginal    > $F_ModifyDate          + 2 || \
         $F_DateTimeOriginal    > $F_FileModifyDate      + 2 || \
         $F_DateTimeOriginal    > $F_FileInodeChangeDate + 2 || \
         $F_DateTimeOriginal    > $F_FileAccessDate      + 2 || \
+        $F_SonyDateTime        > $F_SonyDateTime2       + 2 || \
+        $F_SonyDateTime        > $F_ModifyDate          + 2 || \
+        $F_SonyDateTime        > $F_FileModifyDate      + 2 || \
+        $F_SonyDateTime        > $F_FileInodeChangeDate + 2 || \
+        $F_SonyDateTime        > $F_FileAccessDate      + 2 || \
+        $F_SonyDateTime2       > $F_ModifyDate          + 2 || \
+        $F_SonyDateTime2       > $F_FileModifyDate      + 2 || \
+        $F_SonyDateTime2       > $F_FileInodeChangeDate + 2 || \
+        $F_SonyDateTime2       > $F_FileAccessDate      + 2 || \
         $F_ModifyDate          > $F_FileModifyDate      + 2 || \
         $F_ModifyDate          > $F_FileInodeChangeDate + 2 || \
         $F_ModifyDate          > $F_FileAccessDate      + 2 || \
@@ -152,7 +168,7 @@ exiftool -csv -d "%s" -f -i SYMLINKS -m -progress: -q -r \
         (($DEBUG)) && echo "DEBUG: $file  to  $mindate"
         exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
             -m -overwrite_original_in_place -q \
-            -AllDates="$mindate" -SonyDateTime="$mindate" -IFD1:ModifyDate="$mindate" -FileModifyDate="$mindate" \
+            -AllDates="$mindate" -SonyDateTime="$mindate" -SonyDateTime2="$mindate" -IFD1:ModifyDate="$mindate" -FileModifyDate="$mindate" \
             $file
     done
     

@@ -97,6 +97,7 @@ Following timestamps are modified if they existed before:
 * CreateDate
 * DateTimeOriginal
 * SonyDateTime
+* SonyDateTime2
 * ModifyDate
 * FileModifyDate
 
@@ -114,6 +115,7 @@ Following tmestamps are modified if they existed before:
 * CreateDate
 * DateTimeOriginal
 * SonyDateTime
+* SonyDateTime2
 * ModifyDate
 * FileModifyDate
 

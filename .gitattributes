@@ -1,0 +1,6 @@
+*      text=auto
+*.bash text eol=lf
+*.bat  text eol=crlf
+*.cfg  text
+*.fmt  text
+*.md   text
