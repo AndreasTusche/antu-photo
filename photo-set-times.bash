@@ -18,21 +18,19 @@
 #       IFD1:ModifyDate
 #       ModifyDate
 #       SonyDateTime
-#       SonyDateTime2
 #
 # FILES
-#	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
+# Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
 # AUTHOR
-#	@author     Andreas Tusche
-#	@copyright  (c) 2017, Andreas Tusche 
-#	@package    antu-photo
-#	@version    $Revision: 0.0 $
-#	@(#) $Id: . Exp $
+# @author     Andreas Tusche
+# @copyright  (c) 2017, Andreas Tusche 
+# @package    antu-photo
+# @version    $Revision: 0.0 $
+# @(#) $Id: . Exp $
 #
 # when       who  what
 # 2017-04-11 AnTu created
-# 2017-05-06 AnTu added support for SonyDateTime2
 
 T="${1//-/:} ${2//-/:}"
 DIRNAME="$( readlink -f "${3:-$(pwd)}" )"
@@ -45,5 +43,5 @@ esac
 
 exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
     -m -overwrite_original_in_place -progress: -q \
-    -AllDates="$T" -SonyDateTime="$T" -SonyDateTime2="$T" -IFD1:ModifyDate="$T" -FileModifyDate="$T" \
+    -AllDates="$T" -SonyDateTime="$T" -IFD1:ModifyDate="$T" -FileModifyDate="$T" \
     $DIRNAME

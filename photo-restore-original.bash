@@ -13,16 +13,17 @@
 #   replace the edited versions in a directory and all its subdirectories.
 #
 # AUTHOR
-#	@author     Andreas Tusche
-#	@copyright  (c) 2017, Andreas Tusche 
-#	@package    antu-photo
-#	@version    $Revision: 0.0 $
-#	@(#) $Id: . Exp $
+# @author     Andreas Tusche
+# @copyright  (c) 2017, Andreas Tusche 
+# @package    antu-photo
+# @version    $Revision: 0.0 $
+# @(#) $Id: . Exp $
 #
 # when       who  what
 # 2017-04-08 AnTu created
 
-DIRNAME="${1:-$( readlink -f "${1:-$(pwd)}" )}"
+#DIRNAME="${1:-$( readlink -f "${1:-$(pwd)}" )}"
+DIRNAME="${1:-$(pwd)}"
 
 exiftool -i SYMLINKS -q -r -restore_original "$DIRNAME"
 find "$DIRNAME" -type f -name "*_original" | while read f ; do mv "$f" "${f%%_original}" ; done

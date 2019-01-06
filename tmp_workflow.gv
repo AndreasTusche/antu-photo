@@ -1,0 +1,112 @@
+digraph workflow {
+    graph [fontsize="8", xxlayout="dot"];
+    // node  [shape="box"]
+    edge  [fontsize="10"]
+
+    /* locations */
+    {node [color=Gold shape=record style=filled fillcolor=Lemonchiffon];
+        OldArchive [label="<1> Old Archive\nor Catalogue | { <R> RAW | <J> JPG | <M> MOV | <X> misc}"]
+
+  Inbox      [label="{<1> Inbox | { <R> RAW | <J> JPG | <M> MOV | <X> misc } }"]
+
+        Trash      [label=".Trash"]
+        Video      [label="Video Clips\nand Movies"]
+
+        Working    [label="Working Folder"]
+        Sorted     [label="<1> Local Archive\nor Catalogue | <R> RAW | <J> JPG"]
+
+        Catalogue  [label="<1> Catalogue | <J> JPG"]
+
+        NASInbox   [label="<1> NAS Inbox | { <R> RAW | <J> JPG }"]
+        Archive    [label="{{ <D> DNG | <O> ORIGINAL | <E> EDITED | <S> SideCar } | <1> Final Archive on NAS}"]
+    }
+
+
+    /* Actions */
+    {node [color=Red xshape=box style=filled fillcolor=moccasin];
+        Check      [label="Check\nCamera Settings"]
+        Take       [label="Take Photos\nRAW, JPG"]
+
+        Metadata   [label="Correct\nMetadata"]
+        Timestamps [label="Correct\nTimestamps"]
+        Presort    [label="Presort Images"]
+        Review     [label="Review\nand Trash"]
+
+        Shrink      [label="Resize"]
+
+        Identify   [label="Identify original\n or edited"]
+
+        Edit       [label="Edit Images"]
+        Publish    [label="Publish"]
+    }
+
+
+    subgraph cluster_cam {
+        style="dotted"
+        //OldArchive
+        Check
+        Take
+    }
+
+    subgraph cluster_local {
+        Inbox
+        Video
+
+        Metadata
+        Timestamps
+        Presort
+        Review
+
+        Sorted
+        
+        Shrink
+        Catalogue
+        Working
+        Edit
+        Publish
+    }
+    subgraph cluster_nas {
+        style="dotted"
+        NASInbox
+        Identify
+        Archive
+    }
+
+
+/* external */
+    // Trash
+
+    /* from actions */
+
+    Check          -> Take             [color=gray]
+    Edit           -> Working          [color=blue]
+    Edit           -> Publish          [color=blue]
+    Identify       -> Archive:O        [color=orangered]
+    Identify       -> Archive:E        [color=blue]
+    Metadata       -> Timestamps
+    Presort        -> Review
+    Review         -> Sorted:J         [color=blue]
+    Review         -> Sorted:R         [color=orangered]
+    Sorted:1:s     -> Working
+    Review         -> Trash
+    Take           -> Inbox:1:n
+    Timestamps     -> Inbox:1:w
+
+    /* from locations */
+    //Archive:O:n    -> Archive:D:n
+    //Archive:O      -> Working          [color=orangered]
+    //Archive:E:n    -> Archive:S:n
+    Inbox:J:s        -> Metadata       [color=blue]
+    Inbox:R:s        -> Metadata       [color=orangered]
+    Inbox:J        -> Presort          [color=blue]
+    Inbox:R        -> Presort          [color=orangered]
+    Inbox:M        -> Video
+    Inbox:X        -> Trash
+    NASInbox       -> Identify
+    OldArchive:1   -> Inbox:1:nw
+    Sorted:J       -> Shrink -> Catalogue:J      [color=blue]
+    Sorted:J:s     -> NASInbox         [color=blue]
+    Sorted:R:s     -> NASInbox         [color=orangered]
+    Working        -> Edit
+    Working        -> Inbox:J:se       [color=blue]
+}

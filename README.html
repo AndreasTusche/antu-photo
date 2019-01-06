@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <title>README</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///C:\Users\tusche\.atom\packages\markdown-preview-enhanced\node_modules\@shd101wyy\mume\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+      <style> 
+      /**
+ * prism.js Github theme based on GitHub's theme.
+ * @author Sam Clarke
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333;
+  background: none;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4;
+
+  -moz-tab-size: 8;
+  -o-tab-size: 8;
+  tab-size: 8;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: .8em;
+  overflow: auto;
+  /* border: 1px solid #ddd; */
+  border-radius: 3px;
+  /* background: #fff; */
+  background: #f5f5f5;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+  background: #f5f5f5;
+}
+
+.token.comment,
+.token.blockquote {
+  color: #969896;
+}
+
+.token.cdata {
+  color: #183691;
+}
+
+.token.doctype,
+.token.punctuation,
+.token.variable,
+.token.macro.property {
+  color: #333;
+}
+
+.token.operator,
+.token.important,
+.token.keyword,
+.token.rule,
+.token.builtin {
+  color: #a71d5d;
+}
+
+.token.string,
+.token.url,
+.token.regex,
+.token.attr-value {
+  color: #183691;
+}
+
+.token.property,
+.token.number,
+.token.boolean,
+.token.entity,
+.token.atrule,
+.token.constant,
+.token.symbol,
+.token.command,
+.token.code {
+  color: #0086b3;
+}
+
+.token.tag,
+.token.selector,
+.token.prolog {
+  color: #63a35c;
+}
+
+.token.function,
+.token.namespace,
+.token.pseudo-element,
+.token.class,
+.token.class-name,
+.token.pseudo-class,
+.token.id,
+.token.url-reference .token.variable,
+.token.attr-name {
+  color: #795da3;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.title,
+.token.title .token.punctuation {
+  font-weight: bold;
+  color: #1d3e81;
+}
+
+.token.list {
+  color: #ed6a43;
+}
+
+.token.inserted {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.token.deleted {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+
+/* JSON */
+.language-json .token.property {
+  color: #183691;
+}
+
+.language-markup .token.tag .token.punctuation {
+  color: #333;
+}
+
+/* CSS */
+code.language-css,
+.language-css .token.function {
+  color: #0086b3;
+}
+
+/* YAML */
+.language-yaml .token.atrule {
+  color: #63a35c;
+}
+
+code.language-yaml {
+  color: #183691;
+}
+
+/* Ruby */
+.language-ruby .token.function {
+  color: #333;
+}
+
+/* Markdown */
+.language-markdown .token.url {
+  color: #795da3;
+}
+
+/* Makefile */
+.language-makefile .token.symbol {
+  color: #795da3;
+}
+
+.language-makefile .token.variable {
+  color: #183691;
+}
+
+.language-makefile .token.builtin {
+  color: #0086b3;
+}
+
+/* Bash */
+.language-bash .token.keyword {
+  color: #0086b3;
+}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc ul{padding:0 1.6em;margin-top:.8em}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc li{margin-bottom:.8em}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc ul{list-style-type:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  150px);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+ 
+      </style>
+    </head>
+    <body for="html-export">
+      <div class="mume markdown-preview   ">
+      <h1 class="mume-header" id="antu-photo-workflow">AnTu Photo Workflow</h1>
+
+<p>I’m an amateur photographer and I take photos at family events or during my holidays, they are my memories and must not be lost. I want the original images to be archived and never be touched again. This is the main requirement for my workflow. Additionally I’d like to have all images available in a quickly browse-able catalogue. Third party applications may help to add or search for meta-information. Only when that is sorted I am going to edit (aka ‘photoshop’) the photos and of course I want to archive the working files and the final results.</p>
+<h2 class="mume-header" id="requirements">Requirements</h2>
+
+<p>The workflow is therefore modelled to support these two main requirements:</p>
+<ul>
+<li>Archiving - Put them in a safe place and never touch again.</li>
+<li>Browsing  - Have all images in a catalogue with metadata.</li>
+</ul>
+<p>‘Editing’ is not part of the workflow because the working files and results are just a different kind of input to the workflow again.</p>
+<h2 class="mume-header" id="the-workflow">The workflow</h2>
+
+<ol>
+<li><a href="#take-photos">Take photos</a> - in RAW, JPG or both.</li>
+<li><a href="#pre-sort-photos">Pre-Sort photos</a> - using <a href=""><code>antu-sortphotos.bash</code></a></li>
+<li><a href="#review-images">Review images</a> - trash unwanted</li>
+<li>Archive best originals, e.g. RAW if available</li>
+<li>Convert best originals into format for the catalogue</li>
+<li>Ingest in catalogue</li>
+<li>Convert best originals into format for editing</li>
+<li>Archive edited files including sidecar files - but apart from originals</li>
+</ol>
+<h3 class="mume-header" id="take-photos">Take photos</h3>
+
+<p>My current camera stores photos as RAW or JPG or both. Usually I want to store as much of the original information as possible and hence I use uncompressed RAW in the highest resolution. Unfortunately, the RAW format is proprietary, which is true for almost all cameras, and my computer cannot quickly display the image in the Finder - it takes ages. For browsing purposes, I also set the camera to additionally store the JPG directly on the SD card.</p>
+<p>My camera also allows for some special scenes, like panorama or multi-exposure. Those photos are not stored as RAW but only as JPG. My older cameras used different RAW formats or did not support RAW at all. This has to be taken account for in the further workflow.</p>
+<p>Most cameras add meta-information, like time-stamps, exposure and lens settings. Usually that goes to the EXIF header of the image files. My camera does not add geo-location, but my phone does. As I do not have a GPS tracker, I take at least one photo with the phone at every new location, well I wish I did. Usually those phone photos get thrown away after I extracted the geo-location. Be prepared that some of the meta-information may not be very accurate though.</p>
+<p>To allow later chronological sorting, time-stamps should be at least accurate by the day. When shooting with two or more cameras simultaneously, think of sharing photos with friends or just using your phone from time to time, then you want to have the time accurate to a few seconds. So, always check the camera time before shooting and additionally take a photo of a very accurate time display, e.g. <a href="https://time.is">https://time.is</a> - that allows for later precise corrections.</p>
+<p>Older photos may origin from Photo CDs, scans of paper photos or of film negatives. The meta-information of those files usually is of little or no use. Be prepared for manual work.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">In brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Use RAW whenever possible.</td>
+</tr>
+<tr>
+<td style="text-align:left">At each location use a GPS tracker or take a photo with a geo-location phone.</td>
+</tr>
+<tr>
+<td style="text-align:left">Always have the camera clock precisely set and take a photo of an accurate time-stamp.</td>
+</tr>
+</tbody>
+</table>
+<h3 class="mume-header" id="pre-sort-photos">Pre-sort photos</h3>
+
+<h4 class="mume-header" id="directory-structure">Directory structure</h4>
+
+<p>Before sorting the photos you would need to make your mind up where to sort them to. A directory structure in the file system has to be created. I just want them sorted by date and time. I do not want to have sorting by camera, lens, events, locations or people. I also do not want to rename files manually.</p>
+<h5 class="mume-header" id="final-location">Final location</h5>
+
+<p>The final location has a directory per year and subdirectories per day. Files are renamed to the date and time, like this</p>
+<pre class="language-text">~&#x2F;Pictures&#x2F;YYYY&#x2F;YYYY-MM-DD&#x2F;YYYYMMDD-hhmmss.jpg
+</pre>
+<p>If several pictures were shot at the same second, then a frame number may be added, like this</p>
+<pre class="language-text">~&#x2F;Pictures&#x2F;YYYY&#x2F;YYYY-MM-DD&#x2F;YYYYMMDD-hhmmss_ff.jpg
+</pre>
+<p>I just need the creation date but when you are also using video clips you may want to have a start and end date and, after editing, a modification date in the filename, up to you, e.g.</p>
+<pre data-role="codeBlock" data-info="" class="language-"><code>~/Pictures/YYYY/YYYY-MM-DD/YYYYMMDDhhmmss_YYYYMMDDhhmmss_YYYYMMDDhhmmss.jpg
+                           |              |              |
+start date and time -------+              |              |
+  end date and time ----------------------+              |
+ edit date and time -------------------------------------+
+</code></pre><p>Try not to become too creative here, the simpler, the easier it is to maintain in future.</p>
+<h5 class="mume-header" id="inbox">Inbox</h5>
+
+<p>Where ever the photos are coming from - the SD card of the camera, an USB stick, other directories - the automated workflow should always start at the very same place. This allows full control on which files are processed and minimises fatal errors by accidentally using a wrong source directory.</p>
+<p>I copy <em>all</em> those photos that I took since the last time from the camera SD card to the Inbox:</p>
+<pre class="language-text">~&#x2F;Pictures&#x2F;INBOX&#x2F;
+</pre>
+<p>By doing it manually I usually avoid creating duplicates. The original files stay on the SD card until I have at least propperly archived these new files. This saves me from fatal errors, should I do something wrong or should one of my scripts develop its own mind.</p>
+<p>Copying can be done using the Finder or, as I prefer it, from the Unix command line, using <code>rsync</code>. In case of partial transfers they should be kept away in a dedicated directory. So I type</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell"><span class="token function">cd</span> /Volumes/SD_Card/DCIM
+<span class="token function">rsync</span> -rtv --partial-dir<span class="token operator">=</span>~/Pictures/ERROR <span class="token keyword">.</span> ~/Pictures/INBOX/
+</pre><p>Scripting this step is not straight forward as every SD card is going to be mounted under a new name; nevertheless I gave it a try and wrote the script <a href="#photo-import-sd">photo-import-sd.bash</a> for Mac OS X.</p>
+<h5 class="mume-header" id="stage-1">Stage 1</h5>
+
+<p>I could start checking the photos already now and throw away failed ones - but I don’t. In the Inbox I may have a mix of RAW, JPG files and eventually some video clips or any other stuff that I don’t need. Before adding the photos to the <a href="#final_location">final location</a> I want to review them and hence keep them in a dedicated directory.</p>
+<pre class="language-text">~&#x2F;Pictures&#x2F;sorted&#x2F;
+</pre>
+<p>All files need to be sorted in respective directories for later manual inspection. In this order</p>
+<ul>
+<li>unwanted stuff goes to <code>~/Pictures/ERROR/</code></li>
+<li>video clips go to <code>~/Movies/yyyy/yyyy-mm-dd/</code></li>
+<li>RAW images go to <code>~/Pictures/RAW/yyyy/yyyy-mm-dd/</code></li>
+<li>edited images go to <code>~/Pictures/edit/yyyy/yyyy-mm-dd/</code></li>
+<li>photos get sorted to <code>~/Pictures/sorted/yyyy/yyyy-mm-dd/</code></li>
+</ul>
+<p>Unwanted stuff are image-catalogues, application directories or third party libraries that may be mistaken as images in a later step. They are recognised by their file extension:</p>
+<pre class="language-text">.app .dmg .icbu .imovielibrary .keynote .oo3 .mpkg .numbers .pages
+.photoslibrary .pkg .theater .webarchive
+</pre>
+<p>Movies are recognised by their file extension:</p>
+<pre class="language-text">.3g2 .3gp .asf .avi .drc .flv .f4v .f4p .f4a .f4b .lrv .m4v .mkv
+.mov .qt .mp4 .m4p .moi .mod .mpg .mp2 .mpeg .mpe .mpv .mpg .mpeg
+.m2v .ogv .ogg .pgi .rm .rmvb .roq .svi .vob .webm .wmv .yuv
+</pre>
+<p>RAW images are recognised by their file extension:</p>
+<pre class="language-text">.3fr .3pr .ari .arw .bay .cap .ce1 .ce2 .cib .cmt .cr2 .craw .crw
+.dc2 .dcr .dcs .dng .eip .erf .exf .fff .fpx .gray .grey .gry .iiq
+.kc2 .kdc .kqp .lfr .mdc .mef .mfw .mos .mrw .ndd .nef .nop .nrw
+.nwb .olr .orf .pcd .pef .ptx .r3d .ra2 .raf .raw .rw2 .rwl .rwz
+.sd[01] .sr2 .srf .srw .st[45678] .stx .x3f .ycbcra
+</pre>
+<p>Edited images are recognised by their file extension:</p>
+<pre class="language-text">.afphoto .bmp .eps .pdf .psd .tif .tiff
+</pre>
+<p>Images and RAW images are renamed to <code>YYYYMMDD-hhmmss.xxx</code>, duplicates are not kept but if two files were taken at the same second, the filename will be suffixed with a an incremental frame number: <code>YYYYMMDD-hhmmss_ff.xxx</code>.</p>
+<p>For each of the above categories (unwanted stuff, video clips, … ) the files are moved to a temporary working directory <code>~/Pictures/tmp_sortphotos/</code>. For example</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">EXT<span class="token operator">=</span><span class="token string">"gif|jpeg|jpg|png|tif|tiff"</span>
+DIR<span class="token operator">=</span><span class="token string">"~/Pictures/tmp_sortphotos/"</span>
+
+<span class="token function">find</span> -E <span class="token keyword">.</span> -iregex <span class="token string">".*\.(<span class="token variable">$EXT</span>)"</span> -exec <span class="token function">mv</span> -v -n <span class="token string">"{}"</span> <span class="token string">"<span class="token variable">$DIR</span>"</span> \<span class="token punctuation">;</span>
+</pre><h4 class="mume-header" id="automate-it-the-script">Automate it - the script</h4>
+
+<h5 class="mume-header" id="the-exiftool">The ExifTool</h5>
+
+<p>All the heavy-lifting is done by the excellent <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">ExifTool</a> by Phil Harvey.</p>
+<p>The ExifTool is a platform-independent Perl library plus a command-line application for reading, writing and editing meta information in a wide variety of files. ExifTool supports many different metadata formats. The MacOS package installs the ExifTool command-line application and libraries in <code>/usr/local/bin</code>. After installing, type <code>exiftool</code> in a Terminal window to run exiftool and read the application documentation. It has a steep learning curve but is worth it.</p>
+<p>A Note to Unix Power-Users. If you find the need to use “find” or “awk” in conjunction with ExifTool, then you probably haven’t discovered the full power of ExifTool. Read about the <code>-ext</code>, <code>-if</code>, <code>-p</code> and <code>-tagsFromFile</code> options in the application documentation. (This is common mistake number 3.) Often users write shell scripts to do some specific batch processing when the exiftool application already has the ability to do this either without scripting or with a greatly simplified script. This includes the ability to recursively scan sub-directories for a specific file extension (case insensitive), rename files from metadata values, and move files to different directories.</p>
+<p>Nevertheless, I wrote some scripts mainly to store those powerfull one-liners.</p>
+<h5 class="mume-header" id="sorting-by-date-and-time">Sorting by date and time</h5>
+
+<p>The ExifTool can check for available timestamps within the image files. If a <code>CreateDate</code> was found, that one is used, else use <code>DateTimeOriginal</code>, <code>ModifyDate</code> or <code>FileModifyDate</code> in that order. All files are renamed and sorted into the directory structure, subdirectories are created as needed.</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">exiftool \
+    -m -r -progress: -q \
+    -d <span class="token string">"~/Pictures/sorted/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+c.%%le"</span>\
+    <span class="token string">"-FileName&lt;FileModifyDate"</span>\
+    <span class="token string">"-FileName&lt;ModifyDate"</span>\
+    <span class="token string">"-FileName&lt;DateTimeOriginal"</span>\
+    <span class="token string">"-FileName&lt;CreateDate"</span>\
+    <span class="token string">"~/Pictures/tmp_sortphotos/"</span>
+</pre><p>The above file-naming is only good for maximum one photo per second, but when several photos were taken in a series, then the EXIF data may contain a frame number which can be used to distinguish between them. The command would then read:</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">exiftool \
+    -if <span class="token string">'<span class="token variable">$FrameNumber</span>'</span> -m -r -progress: -q \
+    -d <span class="token string">"~/Pictures/sorted/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"</span>\
+    <span class="token string">'-FileName&lt;<span class="token variable">${FileModifyDate}</span>_<span class="token variable">${FrameNumber}</span>%+c.<span class="token variable">${FileTypeExtension}</span>'</span>\
+    <span class="token string">'-FileName&lt;<span class="token variable">${ModifyDate}</span>_<span class="token variable">${FrameNumber}</span>%+c.<span class="token variable">${FileTypeExtension}</span>'</span>\
+    <span class="token string">'-FileName&lt;<span class="token variable">${DateTimeOriginal}</span>_<span class="token variable">${FrameNumber}</span>%+c.<span class="token variable">${FileTypeExtension}</span>'</span>\
+    <span class="token string">'-FileName&lt;<span class="token variable">${CreateDate}</span>_<span class="token variable">${FrameNumber}</span>%+c.<span class="token variable">${FileTypeExtension}</span>'</span>\
+    <span class="token string">"~/Pictures/tmp_sortphotos/"</span>
+</pre><h6 class="mume-header" id="correcting-timestamps">Correcting timestamps</h6>
+
+<p>As mentioned earlier, the meta-data may not be as accurate as wanted. Especially for older photos, which may have been touched by some 3<sup>rd</sup> party software, the time-stamps may be wrong. As a rule of thumb it can be assumed that the oldest time-stamp is the actual creation date. If a GPS timestamp exists, it is preferrable to trust that one.</p>
+<p>In some cases the timestamp is not valid at all. I found that the iPhone 5S delivers illegal date values like <code>GPSDateTime: 2015:08:233 23:15:05.72Z</code>, where the date (<code>233</code>) is the day-of-year.</p>
+<p>The following command can be used to extract most common time-stamps and present them as a csv list per file.</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">exiftool \
+    -csv -d <span class="token string">"%s"</span> -f -m -progress: -q -r \
+    -GPSDateTime -CreateDate -DateTimeOriginal -ModifyDate -FileModifyDate -FileInodeChangeDate -FileAccessDate \
+    <span class="token string">"~/Pictures/tmp_sortphotos/"</span>
+</pre><p>Once the minimum timestamp is identified, all the other timestamps can be adjusted. Just have the <code>mindate</code> for each file in the format <code>&quot;%Y:%m:%d %H:%M:%S&quot;</code> and then use the ExifTool again:</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">exiftool \
+    -m -overwrite_original_in_place -q \
+    -AllDates<span class="token operator">=</span><span class="token string">"<span class="token variable">$mindate</span>"</span> -SonyDateTime<span class="token operator">=</span><span class="token string">"<span class="token variable">$mindate</span>"</span> -IFD1:ModifyDate<span class="token operator">=</span><span class="token string">"<span class="token variable">$mindate</span>"</span> -FileModifyDate<span class="token operator">=</span><span class="token string">"<span class="token variable">$mindate</span>"</span> \
+    <span class="token string">"~/Pictures/tmp_sortphotos/&lt;&lt;&lt;MyFile>>>"</span>
+</pre><blockquote>
+<p>I did not yet find an option to extract time-stamps and set them to the minimum in <em>one single</em> ExifTool call. I’d be intersted to hear back from you.</p>
+</blockquote>
+<p>Obviously time stamps should be correct before files are renamed and sorted. The script <a href="#antu-sortphotos">antu-sortphotos.bash</a> first calls the small helper script <a href="#photo-fix-times">photo-fix-times.bash</a> which also takes care of the iPhone bug and then it calls <a href="#photo-sort-time-frame">photo-sort-time-frame.bash</a> which recursivly renames and sorts photos by creation-date and frame-number.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">In brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Create a directory structure that supports your workflow.</td>
+</tr>
+<tr>
+<td style="text-align:left">Use the ExifTool to extract, correct time-spans or to modify meta-information.</td>
+</tr>
+<tr>
+<td style="text-align:left">Use the ExifTool to sort files in places for review.</td>
+</tr>
+</tbody>
+</table>
+<pre data-role="codeBlock" data-info="" class="language-"><code>    ~
+    &#x251C;&#x2500;&#x2500; .Trash
+    &#x251C;&#x2500;&#x2500; Movies
+    &#x2502;   &#x2514;&#x2500;&#x2500; YYYY
+    &#x2502;       &#x2514;&#x2500;&#x2500; YYYY-MM-DD
+    &#x2514;&#x2500;&#x2500; Pictures
+        &#x251C;&#x2500;&#x2500; EDIT
+        &#x251C;&#x2500;&#x2500; ERROR
+        &#x251C;&#x2500;&#x2500; INBOX
+        &#x251C;&#x2500;&#x2500; RAW
+        &#x2502;   &#x2514;&#x2500;&#x2500; YYYY
+        &#x2502;       &#x2514;&#x2500;&#x2500; YYYY-MM-DD
+        &#x251C;&#x2500;&#x2500; SORTED
+        &#x2502;   &#x2514;&#x2500;&#x2500; tmp_sortphotos
+        &#x2514;&#x2500;&#x2500; YYYY
+            &#x2514;&#x2500;&#x2500; YYYY-MM-DD
+</code></pre><h3 class="mume-header" id="review-images">Review images</h3>
+
+<p>This step is completely manual. Some photos just belong in the Trash.</p>
+<p>Well, I check JPG files only but I want to get rid of the respective RAW as well. The little script <a href="#photo-trash">photo-trash.bash</a> moves corresponding RAW files to the Trash, they are easily identified by the same file-base-name, i.e. the time-stamp.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">In brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Review files and trash bad photos.</td>
+</tr>
+</tbody>
+</table>
+<h3 class="mume-header" id="archive-best-originals-eg-raw-if-available">Archive best originals, e.g. RAW if available</h3>
+
+<p><em>tbw</em></p>
+<h3 class="mume-header" id="convert-best-originals-into-format-for-the-catalogue">Convert best originals into format for the catalogue</h3>
+
+<p><em>tbw</em></p>
+<h3 class="mume-header" id="ingest-in-catalogue">Ingest in catalogue</h3>
+
+<p><em>tbw</em></p>
+<h3 class="mume-header" id="convert-best-originals-into-format-for-editing">Convert best originals into format for editing</h3>
+
+<p><em>tbw</em></p>
+<h3 class="mume-header" id="archive-edited-files-including-sidecar-files-but-apart-from-originals">Archive edited files including sidecar files -  but apart from originals</h3>
+
+<p><em>tbw</em></p>
+<h2 class="mume-header" id="the-scripts-explained">The Scripts explained</h2>
+
+<p>All these scripts were written for MAC OS X. That operating system provides Unix tools that may not be available on any other Unix distribution. If you port the scripts to any other machine, I’d like to hear back from you.</p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th>awk</th>
+<th>bash</th>
+<th>perl</th>
+<th>ExifTool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macOS 10.12.4</td>
+<td>GNU 4.1.1</td>
+<td>3.2.57(1)</td>
+<td>5.18.2</td>
+<td>10.48</td>
+</tr>
+</tbody>
+</table>
+<h2 class="mume-header" id="antu-sortphotos">antu-sortphotos</h2>
+
+<p>This script moves files in this order</p>
+<ul>
+<li>movies to        <code>~/Movies/yyyy/yyyy-mm-dd/</code></li>
+<li>raw images to    <code>~/Pictures/RAW/yyyy/yyyy-mm-dd/</code></li>
+<li>edited images to <code>~/Pictures/edit/yyyy/yyyy-mm-dd/</code></li>
+<li>photos to        <code>~/Pictures/sorted/yyyy/yyyy-mm-dd/</code></li>
+</ul>
+<p>Filetypes are recognised by their file extensions.
+Images and RAW images are renamed to <code>YYYYMMDD-hhmmss.xxx</code>, duplicates are not kept but if two files were taken at the same second, the filename will be suffixed with a an incremental number: <code>YYYYMMDD-hhmmss_n.xxx</code>.</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">    <span class="token comment">#!/bin/bash</span>
+    DIR_ANTU_PHOTO<span class="token operator">=</span><span class="token string">"<span class="token variable">${0%/*}</span>"</span>
+    CMD_correcttim<span class="token operator">=</span><span class="token string">"<span class="token variable">${DIR_ANTU_PHOTO}</span>/photo-fix-times.bash"</span>
+    CMD_sortphotos<span class="token operator">=</span><span class="token string">"<span class="token variable">${DIR_ANTU_PHOTO}</span>/photo-sort-time-frame.bash"</span>
+
+    DIR_EDT<span class="token operator">=</span>~/Pictures/edit/
+    DIR_ERR<span class="token operator">=</span>~/Pictures/ERROR/
+    DIR_MOV<span class="token operator">=</span>~/Movies/
+    DIR_PIC<span class="token operator">=</span>~/Pictures/sorted/
+    DIR_RAW<span class="token operator">=</span>~/Pictures/RAW/
+    DIR_SRC<span class="token operator">=</span>~/Pictures/INBOX/
+    DIR_TMP<span class="token operator">=</span>~/Pictures/sorted/tmp_sortphotos/
+
+    RGX_EDT<span class="token operator">=</span><span class="token string">"afphoto|bmp|eps|ico|pdf|psd"</span>
+    RGX_ERR<span class="token operator">=</span><span class="token string">"app|dmg|icbu|imovielibrary|keynote|oo3|mpkg|numbers|pages|potoslibrary|pkg|theater|webarchive"</span>
+    RGX_MOV<span class="token operator">=</span><span class="token string">"3g2|3gp|aae|asf|avi|drc|flv|f4v|f4p|f4a|f4b|lrv|m4v|mkv|modmoi|mov|qt|mp4|m4p|mpg|mp2|mpeg|mpe|mpv|mpg|mpeg|m2v|ogv|ogg|pgi|rm|mvb|roq|svi|vob|webm|wmv|yuv"</span>
+    RGX_RAW<span class="token operator">=</span><span class="token string">"3fr|3pr|ari|arw|bay|cap|ce1|ce2|cib|cmt|cr2|craw|crw|dc2|dc|dcs|dng|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|dc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|rf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"</span>
+
+    <span class="token function">cd</span> <span class="token variable">$DIR_SRC</span>
+    <span class="token comment"># move errornous files out of the way</span>
+    <span class="token function">find</span> -E <span class="token keyword">.</span> -iregex <span class="token string">".*\.(<span class="token variable">$RGX_ERR</span>)"</span> -exec <span class="token function">mv</span> -v -n <span class="token string">"{}"</span> <span class="token variable">$DIR_ERR</span> \<span class="token punctuation">;</span>
+
+    <span class="token comment"># move and rename Videos</span>
+    <span class="token function">find</span> -E <span class="token keyword">.</span> -iregex <span class="token string">".*\.(<span class="token variable">$RGX_MOV</span>)"</span> -exec <span class="token function">mv</span> -v -n <span class="token string">"{}"</span> <span class="token variable">$DIR_TMP</span> \<span class="token punctuation">;</span>
+    <span class="token variable">$CMD_correcttim</span> <span class="token variable">$DIR_TMP</span>
+    <span class="token variable">$CMD_sortphotos</span> <span class="token variable">$DIR_TMP</span> <span class="token variable">$DIR_MOV</span>
+
+    <span class="token comment"># move and rename RAW files</span>
+    <span class="token function">find</span> -E <span class="token keyword">.</span> -iregex <span class="token string">".*\.(<span class="token variable">$RGX_RAW</span>)"</span> -exec <span class="token function">mv</span> -v -n <span class="token string">"{}"</span> <span class="token variable">$DIR_TMP</span> \<span class="token punctuation">;</span>
+    <span class="token variable">$CMD_correcttim</span> <span class="token variable">$DIR_TMP</span>
+    <span class="token variable">$CMD_sortphotos</span> <span class="token variable">$DIR_TMP</span> <span class="token variable">$DIR_RAW</span>
+
+    <span class="token comment"># move and rename edited files</span>
+    <span class="token function">find</span> -E <span class="token keyword">.</span> -iregex <span class="token string">".*\.(<span class="token variable">$RGX_EDT</span>)"</span> -exec <span class="token function">mv</span> -v -n <span class="token string">"{}"</span> <span class="token variable">$DIR_TMP</span> \<span class="token punctuation">;</span>
+    <span class="token variable">$CMD_correcttim</span> <span class="token variable">$DIR_TMP</span>
+    <span class="token variable">$CMD_sortphotos</span> <span class="token variable">$DIR_TMP</span> <span class="token variable">$DIR_EDT</span>
+
+    <span class="token comment"># move and rename all remaining picture files</span>
+    <span class="token variable">$CMD_correcttim</span> <span class="token variable">$DIR_SRC</span>
+    <span class="token variable">$CMD_sortphotos</span> <span class="token variable">$DIR_SRC</span> <span class="token variable">$DIR_PIC</span>
+</pre><p>The complete script: <a href="">antu-sortphotos.bash</a></p>
+<h2 class="mume-header" id="helper-scripts">Helper Scripts</h2>
+
+<h3 class="mume-header" id="photo-extract-gps">photo-extract-gps</h3>
+
+<p>This extracts GPS geo-location information from files in the given directory and subfolders and writes the result in GPX format to stdout.</p>
+<pre class="language-text">photo-extract-gps.bash DIRNAME
+</pre>
+<h3 class="mume-header" id="photo-fix-times">photo-fix-times</h3>
+
+<p>Uses ExifTool to identify the following timestamps. It is expected that they are identical or increasing in this order. If this is not the case, the timestamps are set to the found minimum.</p>
+<pre class="language-text">CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate ≤ FileInodeChangeDate ≤ FileAccessDate
+</pre>
+<p>If a GPS timestamp exists, it is trusted and the CreateDate and DateTimeOriginal values for minutes and seconds are set to those of the GPS timestamp if they were not already identical.</p>
+<pre class="language-text">photo-fix-times.bash [DIRNAME]
+</pre>
+<p><strong>Note:</strong> This script uses GNU awk (<code>gawk</code>) which can be installed using Homebrew, e.g.</p>
+<pre class="language-text">brew install gawk
+</pre>
+<h3 class="mume-header" id="photo-import-sd">photo-import-sd</h3>
+
+<p>The mount point of SD Cards is different for each card. This scripts tries to find it and then copies all Photos from the <code>DCIM</code> to the Inbox directory. By the way, it does not keep track of past copy activities and hence this script may produce a lot of duplicate files on your disk, if you don’t take care.</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">    <span class="token comment">#!/bin/bash</span>
+
+    DIR_DCF<span class="token operator">=</span><span class="token string">''</span>                 <span class="token comment"># auto-find the mount point of SD Card</span>
+    DIR_ERR<span class="token operator">=</span>~/Pictures/ERROR/  <span class="token comment"># error directory</span>
+    DIR_SRC<span class="token operator">=</span>~/Pictures/INBOX/  <span class="token comment"># Inbox directory</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$DIR_DCF</span>"</span> <span class="token operator">==</span> <span class="token string">""</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+        <span class="token comment"># get all mounted disks</span>
+        list<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span> diskutil list <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'/0:/{printf <span class="token variable">$NF</span>" "}'</span><span class="token variable">)</span></span>
+
+        <span class="token comment"># search for SD Card Reader</span>
+        <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token variable">$list</span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+                diskutil info <span class="token variable">$i</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"SD Card Reader"</span> <span class="token operator">></span>/dev/null
+                <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$?</span>"</span> <span class="token operator">==</span> <span class="token string">"0"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                        sdCard<span class="token operator">=</span><span class="token variable">$i</span>
+                        <span class="token keyword">break</span>
+                <span class="token keyword">fi</span>
+        <span class="token keyword">done</span>
+
+        <span class="token comment"># get mount point of SD Card</span>
+        DIR_DCF<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span> diskutil info $<span class="token punctuation">{</span>sdCard<span class="token punctuation">}</span>s1 <span class="token operator">|</span> <span class="token function">awk</span> -F: '/Mount Point/<span class="token punctuation">{</span>gsub<span class="token punctuation">(</span>/^<span class="token punctuation">[</span> \t<span class="token punctuation">]</span>+/, <span class="token string">""</span>, $2<span class="token variable">)</span></span><span class="token punctuation">;</span> print <span class="token variable">$2</span><span class="token punctuation">}</span>' <span class="token punctuation">)</span>
+    <span class="token keyword">fi</span>
+
+    <span class="token comment"># copy photos</span>
+    <span class="token function">cd</span> <span class="token variable">$DIR_DCF</span>/DCIM
+    <span class="token function">rsync</span> -rtv --partial-dir<span class="token operator">=</span><span class="token variable">$DIR_ERR</span> <span class="token keyword">.</span> <span class="token variable">$DIR_SRC</span>
+</pre><p>The complete script: <a href="">photo-import-sd.bash</a></p>
+<h3 class="mume-header" id="photo-restore-original">photo-restore-original</h3>
+
+<p>This automates the maintenance of the “_original” files created by exiftool. It has no effect on files without an “_original” copy. This restores the files from their original copies by renaming the “_original” files to replace the edited versions in a directory and all its subdirectories.</p>
+<pre class="language-text">photo-restore-original.bash DIRECORY
+</pre>
+<h3 class="mume-header" id="photo-set-gps">photo-set-gps</h3>
+
+<p>This extracts GPS geo-location information from files in the given directory and subfolders and stores it in an GPX file, unless it is already available in the same folder.</p>
+<p>In a second step it sets(!) the GPS geo-location information for the other files in the given directory and subfolders. Be aware that it will locate the new positions on a straight line between known track-points.</p>
+<pre class="language-text">photo-set-gps.bash DIRNAME
+</pre>
+<h3 class="mume-header" id="photo-set-times">photo-set-times</h3>
+
+<p>This sets the date and time stamps to the given date for one picture file or for all picture files in the given directory (not recursive).</p>
+<p>Following timestamps are modified if they existed before:</p>
+<ul>
+<li>
+<p>CreateDate</p>
+</li>
+<li>
+<p>DateTimeOriginal</p>
+</li>
+<li>
+<p>SonyDateTime</p>
+</li>
+<li>
+<p>SonyDateTime2</p>
+</li>
+<li>
+<p>ModifyDate</p>
+</li>
+<li>
+<p>FileModifyDate</p>
+<p>photo-set-times.bash YYYY:MM:DD hh:mm:ss FILENAME
+photo-set-times.bash YYYY:MM:DD hh:mm:ss [DIRNAME]</p>
+</li>
+</ul>
+<h3 class="mume-header" id="photo-shift-times">photo-shift-times</h3>
+
+<p>This shifts the date and time stamps by the given number of seconds for one picture file or for all pictures in the given directory (not recursive).</p>
+<p>Following tmestamps are modified if they existed before:</p>
+<ul>
+<li>
+<p>CreateDate</p>
+</li>
+<li>
+<p>DateTimeOriginal</p>
+</li>
+<li>
+<p>SonyDateTime</p>
+</li>
+<li>
+<p>SonyDateTime2</p>
+</li>
+<li>
+<p>ModifyDate</p>
+</li>
+<li>
+<p>FileModifyDate</p>
+<p>photo-shift-times.bash SECONDS [FILENAME|DIRNAME]</p>
+</li>
+</ul>
+<p>It is recommended to then move and rename the modified files using <code>photo-sort-time</code>.</p>
+<h3 class="mume-header" id="photo-sort-time-frame">photo-sort-time-frame</h3>
+
+<p>This moves files from present directory and subfolders to <code>~/Pictures/sorted/YYYY/YYYY-MM-DD/</code>.</p>
+<p>Images and RAW images are renamed to <code>YYYYMMDD-hhmmss_ffff.xxx</code>, based on their CreateDate and Frame Number. Frame Numbers usually only exist where an analogue series of photos was digitalised. If two pictures still end up in the same file-name, it will then be suffixed with a an incremental number: <code>YYYYMMDD-hhmmss_ffff_n.xxx</code>.</p>
+<pre class="language-text">photo-sort-time-frame.bash [INDIR [OUTDIR]]
+</pre>
+<h3 class="mume-header" id="photo-sort-time-model">photo-sort-time-model</h3>
+
+<p>This moves files from present directory and subfolders to <code>~/Pictures/sorted/YYYY/YYYY-MM-DD/</code>.</p>
+<p>Images and RAW images are renamed <code>YYYYMMDD-hhmmss-model.xxx</code>, based on their CreateDate and Camera Model Name. If two pictures were taken at the same second by the same camera, the filename will be suffixed with a an incremental number: <code>YYYYMMDD-hhmmss-model_n.xxx</code>.</p>
+<pre class="language-text">photo-sort-time-model.bash [INDIR [OUTDIR]]
+</pre>
+<h3 class="mume-header" id="photo-sort-time">photo-sort-time</h3>
+
+<p>This moves files from <code>~/Pictures/INBOX/</code> and subfolders to <code>~/Pictures/sorted/YYYY/YYYY-MM-DD/</code></p>
+<p>Images and RAW images are renamed to <code>YYYYMMDD-hhmmss.xxx</code>, based on their CreateDate. If two pictures were taken at the same second, the filename will be suffixed with a an incremental number: <code>YYYYMMDD-hhmmss_n.xxx</code>.</p>
+<pre class="language-text">photo-sort-time.bash [INDIR [OUTDIR]]
+</pre>
+<h3 class="mume-header" id="photo-trash">photo-trash</h3>
+
+<p>A brain-dead script to find corresponding RAW files to already trashed JPG files.</p>
+<pre data-role="codeBlock" data-info="shell" class="language-shell">    <span class="token comment">#!/bin/bash</span>
+
+    DIR_RAW<span class="token operator">=</span>~/Pictures/RAW/
+    RGX_DAT<span class="token operator">=</span><span class="token string">"[12][09][0-9][0-9][01][0-9][0-3][0-9]-[012][0-9][0-5][0-9][0-6][0-9]"</span>
+
+    <span class="token function">cd</span> ~/.Trash
+    <span class="token keyword">for</span> f <span class="token keyword">in</span> <span class="token variable">${RGX_DAT}</span>.jpg <span class="token variable">${RGX_DAT}</span>_<span class="token punctuation">[</span>1-9<span class="token punctuation">]</span>.jpg<span class="token punctuation">;</span> <span class="token keyword">do</span>
+        <span class="token function">mv</span> <span class="token variable">$DIR_RAW</span>/<span class="token variable">${f:0:4}</span>/<span class="token variable">${f:0:4}</span>-<span class="token variable">${f:4:2}</span>-<span class="token variable">${f:6:2}</span>/<span class="token variable">${f%.*}</span>.* <span class="token keyword">.</span>
+    <span class="token keyword">done</span>
+</pre><p>The complete script: <a href="">photo-trash.bash</a></p>
+<h3 class="mume-header" id="merge-gpx">merge-gpx</h3>
+
+<p>Brain-dead merge of GPX files. Removing all headers and trailers. Output goes to stdout.</p>
+<pre class="language-text">merge-gpx.bash FILE1 FILE2 ...
+</pre>
+<h2 class="mume-header" id="configuration">configuration</h2>
+
+<p>The directories and other parameters can be configured using configuration files. All found configuration files will be read and values set in earlier files are overwritten by values found in later files; in this order:</p>
+<ol>
+<li><em>script dir</em>/.antu-photo.cfg</li>
+<li><em>script dir</em>/antu-photo.cfg</li>
+<li><em>user’s home dir</em>/.antu-photo.cfg</li>
+<li><em>user’s home dir</em>/antu-photo.cfg</li>
+<li><em>present dir</em>/.antu-photo.cfg</li>
+<li><em>present dir</em>/antu-photo.cfg</li>
+</ol>
+<p>If no config file was found, the scripts use built-in default.</p>
+<h3 class="mume-header" id="gpx-format">GPX format</h3>
+
+<p>Am example ExifTool print format file <code>gpx.fmt</code> for generating GPX track log that also includes a track-name and track-number based on the start time is provided. All input files must contain GPSLatitude and GPSLongitude.</p>
+
+      </div>
+      
+      
+    </body>
+    
+    
+    
+    
+    
+    
+    
+  </html>

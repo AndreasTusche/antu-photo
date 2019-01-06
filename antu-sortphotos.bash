@@ -4,34 +4,34 @@
 #	antu-sortphotos.bash - move photos and videos to daily folders
 #
 # SYNOPSIS
-#	antu-sortphotos.bash
+#	antu-sortphotos.bash [-2|--stage2]
 #
 # DESCRIPTION
-# 	A quick wrapper around the 'exiftool' tool for my preferred directory
+#	A quick wrapper around the 'exiftool' tool for my preferred directory
 #	strucure. it moves
-#		* movies        from     ~/Pictures/INBOX/ and subfolders
-#		                to       ~/Movies/YYYY/YYYY-MM-DD/
-#		* movies        from     ~/Movies/
-#		                to       ~/Movies/YYYY/YYYY-MM-DD/
-#		* raw images    from     ~/Pictures/INBOX/ and subfolders
-#		                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
-#		* edited images from     ~/Pictures/INBOX/ and subfolders
-#		                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
-#		* photos        from     ~/Pictures/INBOX/ and subfolders
-#		                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
+#	* movies        from     ~/Pictures/INBOX/ and subfolders
+#	                to       ~/Movies/YYYY/YYYY-MM-DD/
+#	* movies        from     ~/Movies/
+#	                to       ~/Movies/YYYY/YYYY-MM-DD/
+#	* raw images    from     ~/Pictures/INBOX/ and subfolders
+#	                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
+#	* edited images from     ~/Pictures/INBOX/ and subfolders
+#	                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
+#	* photos        from     ~/Pictures/INBOX/ and subfolders
+#	                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
 #
-#	The default direcories can be overwritten by the antu-photo.cfg file.
+#	Above default direcory names may be overwritten by the antu-photo.cfg file.
 #
-#	Before actually working on those files, unwanted files - those which are
-#	actually directries on Mac OS X - are move in a separate folder. They are
+#	Before actually working on the photos, unwanted files - e.g. those which are
+#	actually directries on Mac OS X - are moved to a separate folder. They are
 #	recognised by their file extension:
-# 		.app .dmg .icbu .imovielibrary .keynote .oo3 .mpkg .numbers .pages
+#		.app .dmg .icbu .imovielibrary .keynote .oo3 .mpkg .numbers .pages
 #		.photoslibrary .pkg .theater .webarchive
 #
-# 	Movies are sorted first. They are recognised by their file extension:
-#		.3g2 .3gp .asf .avi .drc .flv .f4v .f4p .f4a .f4b .lrv .m4v .mkv .mov
-#		.qt .mp4 .m4p .moi .mod .mpg, .mp2 .mpeg .mpe .mpv .mpg .mpeg, .m2v .ogv
-#		.ogg .pgi .rm .rmvb .roq .svi .vob .webm .wmv .yuv
+#	Movies are sorted first. They are recognised by their file extension:
+#		.3g2 .3gp .aae .asf .avi .drc .flv .f4v .f4p .f4a .f4b .lrv .m4v .mkv
+#		.mov .qt .mp4 .m4p .moi .mod .mpg, .mp2 .mpeg .mpe .mpv .mpg .mpeg .m2v
+#		.ogv .ogg .pgi .rm .rmvb .roq .svi .vob .webm .wmv .yuv
 #
 #	Raw images are recognised by their file extension:
 #		.3fr .3pr .ari .arw .bay .cap .ce1 .ce2 .cib .cmt .cr2 .craw .crw .dc2
@@ -40,32 +40,34 @@
 #		.pcd .pef .ptx .r3d .ra2 .raf .raw .rw2 .rwl .rwz .sd[01] .sr2 .srf .srw
 #		.st[45678] .stx .x3f .ycbcra
 #
-#	Edited images are recognised by their file extension:
+#	Derived or edited images are recognised by their file extension:
 #		.afphoto .bmp .eps .pdf .psd .tif .tiff
 #
 #	All files are checked, if their EXIF timestamps had been corrupted, and are
-#	fixed, if necessary. It is expected that they are identical or increasing in
-#	this order:
-#		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
-#		           ≤ FileInodeChangeDate ≤ FileAccessDate
+#	fixed, if necessary. It is expected that all timestamps are either identical
+#	or increasing in this order:
+# 		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
+#		≤ FileInodeChangeDate ≤ FileAccessDate
 #
 #	Images and RAW images are renamed to YYYYMMDD-hhmmss.xxx, based on their
 #	CreateDate. If two pictures were taken at the same second, the filename will
-#	be suffixed with a an incremental number: YYYYMMDD-hhmmss_n.xxx .
+#	be suffixed with an incremental sequence number: YYYYMMDD-hhmmss_nn.xxx .
 #
 #	In a second invocation, with option '--stage2', pictures will be resorted
-#		* photos        from     ~/Pictures/sorted/ and subfolders
-#		                to       ~/Pictures/YYYY/YYYY-MM-DD/
+#	* photos        from     ~/Pictures/sorted/ and subfolders
+#	                to       ~/Pictures/YYYY/YYYY-MM-DD/
 #
 # FILES
 #	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
 # BUGS
-#	The exiftool may bail out on non-ascii characters in the original filename.
+#	- The exiftool may bail out on non-ascii characters in the filename.
+#	- Companion files from 3rd party software (sidecar files) are not renamed
+#	  and may loose their intended function.
 #
 # AUTHOR
 #	@author     Andreas Tusche
-#	@copyright  (c) 2017, Andreas Tusche 
+#	@copyright  (c) 2017-2018, Andreas Tusche
 #	@package    antu-photo
 #	@version    $Revision: 0.0 $
 #	@(#) $Id: . Exp $
@@ -73,121 +75,125 @@
 # 2015-11-05 AnTu initial version using sortphoto python script
 # 2015-12-05 AnTu added --stage2 option
 # 2017-04-09 AnTu got rid of python script, now using exiftool directly
+# 2018-12-30 AnTu added call to trash-dupliactes
 
-# config
-CMD_correcttim=~/Develop/antu-photo/photo-fix-times.bash
-CMD_extractgps=~/Develop/antu-photo/photo-extract-gps.bash
-CMD_sortphotos=~/Develop/antu-photo/photo-sort-time-frame.bash
-
-DIR_EDT=~/Pictures/edit/
-DIR_SRC=~/Pictures/INBOX/
-DIR_PIC=~/Pictures/sorted/
-DIR_RAW=~/Pictures/RAW/
-DIR_MOV=~/Movies/
-DIR_ERR=~/Pictures/ERROR/
-
-DIR_SRC_2=~/Pictures/sorted/
-DIR_PIC_2=~/Pictures/
+# default config
 
 # --- nothing beyond this line needs configuration -----------------------------
 for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 
-if [ "$1" == "--stage2" ] ; then
+# The 2nd stage moves files to their final local destination
+MYSTAGE=1
+if [[ "$1" == "-2" || "$1" == "--stage2" ]] ; then
+	MYSTAGE=2
 	DIR_SRC=$DIR_SRC_2
 	DIR_PIC=$DIR_PIC_2
 fi
 
-# MAIN
+# === MAIN =====================================================================
 
 cd "${DIR_SRC%/}"
 
-if [ "$1" != "--stage2" ] ; then
+mkdir -p "$DIR_TMP"
+mkdir -p "$DIR_ERR"
 
-	DIR_TMP="${DIR_PIC%/}/tmp_sortphotos/"
-	mkdir -p "$DIR_TMP"
-	mkdir -p "$DIR_ERR"
+if [ "$MYSTAGE" == "1" ] ; then
+# --- stage 1 ------------------------------------------------------------------
 
+# move errornous files out of the way
+echo -e "\nCheck File Types ...\n--------------------"
+find -E . -iregex ".*\.($RGX_ERR)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_ERR%/}"/ \;
 
-	# move errornous files out of the way
-	echo -e "\nCheck File Types ...\n--------------------"
-	find . -regextype posix-egrep -iregex ".*\.(app|dmg|icbu|imovielibrary|keynote|oo3|mpkg|numbers|pages|photoslibrary|pkg|theater|webarchive)" -exec mv -v --backup=t "{}" "${DIR_ERR%/}"/ \;
+for f in "${DIR_ERR%/}"/*.~*; do
+	if [[ ! -e $f ]]; then break; fi
+	n=${f%~*}
+	e=${f#*.}
+	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
+done
 
-	for f in "${DIR_ERR%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done	
+# move and rename video clips amd movies
+echo -e "\nMovies ...\n--------------------"
+find -E . -iregex ".*\.($RGX_MOV)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 
+for f in "${DIR_TMP%/}"/*.~*; do
+	if [[ ! -e $f ]]; then break; fi
+	n=${f%~*}
+	e=${f#*.}
+	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
+done
 
-	# first move and rename Videos
-	echo -e "\nMovies ...\n--------------------"
-	find . -regextype posix-egrep -iregex ".*\.(3g2|3gp|asf|avi|drc|flv|f4v|f4p|f4a|f4b|lrv|m4v|mkv|mod|moi|mov|qt|mp4|m4p|mpg|mp2|mpeg|mpe|mpv|mpg|mpeg|m2v|ogv|ogg|pgi|rm|rmvb|roq|svi|vob|webm|wmv|yuv)" -exec mv -v --backup=t "{}" "${DIR_TMP%/}"/ \;
+if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
+if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "$DIR_MOV%/}" ; fi
+$CMD_sortphotos "$DIR_TMP" "$DIR_MOV"
 
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done	
+# then move and rename RAW files
+# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
+echo -e "\nRAW ...\n--------------------"
+find -E . -iregex ".*\.($RGX_RAW)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 
-	$CMD_correcttim "$DIR_TMP"
-	$CMD_sortphotos "$DIR_TMP" "$DIR_MOV"
+for f in "${DIR_TMP%/}"/*.~*; do
+	if [[ ! -e $f ]]; then break; fi
+	n=${f%~*}
+	e=${f#*.}
+	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
+done
 
-	# then move and rename RAW files
-	echo -e "\nRAW ...\n--------------------"
-	find . -regextype posix-egrep -iregex ".*\.(3fr|3pr|ari|arw|bay|cap|ce1|ce2|cib|cmt|cr2|craw|crw|dc2|dcr|dcs|dng|eip|erf|exf|fff|fpx|gray|grey|gry|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra)" -exec mv -v --backup=t "{}" "${DIR_TMP%/}"/ \;
+if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
+if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_RAW%/}" ; fi
+$CMD_sortphotos "$DIR_TMP" "$DIR_RAW"
 
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
+# then move and rename edited files
+# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
+echo -e "\nEDIT ...\n--------------------"
+find -E . -iregex ".*\.($RGX_EDT)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 
-	$CMD_correcttim "$DIR_TMP"
-	$CMD_sortphotos "$DIR_TMP" "$DIR_RAW"
+for f in "${DIR_TMP%/}"/*.~*; do
+	if [[ ! -e $f ]]; then break; fi
+	n=${f%~*}
+	e=${f#*.}
+	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
+done
 
-
-	# then move and rename edited files
-	echo -e "\nEDIT ...\n--------------------"
-	find . -regextype posix-egrep -iregex ".*\.(afphoto|bmp|eps|pdf|psd|tif|tiff)" -exec mv -v --backup=t "{}" "${DIR_TMP%/}"/ \;
-
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
-
-	$CMD_correcttim "$DIR_TMP"
-	$CMD_sortphotos "$DIR_TMP" "$DIR_EDT"
+if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
+if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_EDT%/}" ; fi
+$CMD_sortphotos "$DIR_TMP" "$DIR_EDT"
 
 fi
+# --- stage 1 and 2 ------------------------------------------------------------
 
-# move and rename all picture files 
+# move and rename all remaining picture files
 echo -e "\nPictures ...\n--------------------"
-$CMD_correcttim "$DIR_SRC"
-$CMD_sortphotos "$DIR_SRC" "$DIR_PIC"
+find -E . -iregex ".*\.($RGX_IMG)" -not -path "${DIR_TMP%/}/*" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 
-if [ "$1" != "--stage2" ] ; then
-	echo "... extracting GPS coordinates"
-	# assuming we have pictures from after the year 2000
-	for d in ${DIR_PIC%/}/2*; do
-		for dd in "${d%/}"/2*; do
-			if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
-			    $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
-				if [[ ! -s "${dd%/}/${GPS_LOG}" ]]; then
-					rm "${dd%/}/${GPS_LOG}"
-				fi
-			fi
-		done
-	done
-fi 
+for f in "${DIR_TMP%/}"/*.~*; do
+	if [[ ! -e $f ]]; then break; fi
+	n=${f%~*}
+	e=${f#*.}
+	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
+done
+
+if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
+if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_PIC%/}" ; fi
+$CMD_sortphotos "$DIR_TMP" "$DIR_PIC"
+
+# if [ "$1" != "--stage2" ] ; then
+#  echo "... extracting GPS coordinates"
+#  # assuming we have pictures from after the year 2000
+#  for d in ${DIR_PIC%/}/2*; do
+#   for dd in "${d%/}"/2*; do
+#    if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
+#        $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
+#     if [[ ! -s "${dd%/}/${GPS_LOG}" ]]; then
+#      rm "${dd%/}/${GPS_LOG}"
+#     fi
+#    fi
+#   done
+#  done
+# fi
 
 ## one-liner for manual gps extract:
 # for d in ~/Pictures/2*; do for dd in "${d%/}"/2*; do if [[ ! -e "${dd%/}/gps.gpx" ]]; then ~/Develop/antu-photo/photo-extract-gps.bash "${dd}" >"${dd%/}/gps.gpx"; fi; done; done
 
 # finally clean up
+rm -f "$DIR_TMP/.DS_Store"
 rm -d "$DIR_TMP"
-

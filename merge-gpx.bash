@@ -1,21 +1,21 @@
 #!/bin/bash
 #
 # NAME
-#	merge-gpx.bash - merge multiple GPX files into one
+# merge-gpx.bash - merge multiple GPX files into one
 # 
 # SYNOPSIS
-#	merge-gpx.bash FILE1 FILE2 ...
+# merge-gpx.bash FILE1 FILE2 ...
 #
 # DESCRIPTION
-#	Brain-dead merge of GPX files. Removing all headers and trailers. Output
+# Brain-dead merge of GPX files. Removing all headers and trailers. Output
 #   goes to stdout.
 #
 # AUTHOR
-#	@author     Andreas Tusche
-#	@copyright  (c) 2017, Andreas Tusche 
-#	@package    antu-photo
-#	@version    $Revision: 0.0 $
-#	@(#) $Id: . Exp $
+# @author     Andreas Tusche
+# @copyright  (c) 2017, Andreas Tusche 
+# @package    antu-photo
+# @version    $Revision: 0.0 $
+# @(#) $Id: . Exp $
 #
 # when       who  what
 # 2017-04-19 AnTu created
