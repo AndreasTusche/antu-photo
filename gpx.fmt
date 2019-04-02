@@ -1,4 +1,4 @@
-#
+# -*- mode: xml -*-
 # NAME
 #   gpx.fmt - ExifTool print format file for generating GPX track log
 #

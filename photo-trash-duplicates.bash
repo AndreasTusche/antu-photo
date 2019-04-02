@@ -4,7 +4,7 @@
 #   photo-trash-duplicates.bash - recursivly moves duplicates to the Trash
 # 
 # SYNOPSIS
-#   photo-trash-duplicates.bash [INDIR] [TODIR]
+#   photo-trash-duplicates.bash [INDIR] [TODIR] [TRASH]
 #
 # DESCRIPTION
 # 	This script finds files ending in a sequence number _nn and compares the
@@ -40,10 +40,12 @@ for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$
 
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 TODIR="$(  readlink -f "${2:-${DIR_PIC_2%/}}" )"
+TRASH="$(  readlink -f "${3:-${DIR_RCY%/}}" )"
 
 (($DEBUG)) && echo "--- trash-duplicates"
 (($DEBUG)) && echo "... INDIR  = $INDIR"
 (($DEBUG)) && echo "... TODIR  = $TODIR"
+(($DEBUG)) && echo "... TRASH  = $TRASH"
 
 #if [[ "${INDIR%/}" == "${DIR_SRC_2%/}" || "${INDIR%/}" == "${DIR_TMP%/}" ]]; then
 	(($DEBUG)) && echo "... compare all files from ${INDIR%/}"
@@ -53,61 +55,43 @@ TODIR="$(  readlink -f "${2:-${DIR_PIC_2%/}}" )"
 #	RGX=".*/${RGX_DAT%/}_[0-9]+(_[0-9]+)?\..*"
 #fi
 
-# @ToDo: use AppleScript only for Mac
-echo "... checking for duplicates"
-osascript >/dev/null <<EOF
-set theFiles to { ¬
-$(
-	IFS='
-	'
-	for candidate in $(
-		# Find files for comparison
-		find ${MAC:+-E} -x "$INDIR" -regex "$RGX" -type f -print0 |#
-			while IFS= read -r -d $'\0' file; do
-				fn="${file##*/}"   # full file name
-				dn="${file%/*}"    # directory name
-				b0="${fn%%_*}"     # file base name, without sequence number
-				bn="${b0%%.*}"     # file base name, just the time stamp
-				yy="${fn:0:4}"     # year 
-				mm="${fn:4:2}"     # month
-				dd="${fn:6:2}"     # day
-				# list files of same basename
-				echo "searching files of date $bn" >/dev/stderr
-				if [[ "${INDIR%/}" != "${TODIR%/}" ]] ; then
-					ls -1 "${TODIR%/}/$yy/$yy-$mm-$dd/$bn"* 2>/dev/null
-				fi
-				ls -1 "$dn/$bn"*
-			done |#
-		sort -u ); do
-			echo "candidate $candidate" >/dev/stderr
-			# use checksums to identify duplicates
-			md5 -r "$candidate"
+IFS='
+'
+for candidate in $(
+	# Find files for comparison
+	find ${MAC:+-E} -x "$INDIR" -regex "$RGX" -type f -print0 |#
+		while IFS= read -r -d $'\0' file; do
+			fn="${file##*/}"   # full file name
+			dn="${file%/*}"    # directory name
+			b0="${fn%%.*}"     # file base name
+			bn="${b0%%_*}"     # file base name, without sequence number
+			yy="${fn:0:4}"     # year 
+			mm="${fn:4:2}"     # month
+			dd="${fn:6:2}"     # day
+			# list files of same basename
+			echo "searching files of date $bn" >/dev/stderr
+			if [[ "${INDIR%/}" != "${TODIR%/}" ]] ; then
+				ls -1 "${TODIR%/}/$yy/$yy-$mm-$dd/$bn"* 2>/dev/null
+			fi
+			ls -1 "$dn/$bn"*
 		done |#
-		sort |#
-		uniq -D -w 32 |#
-		awk '
-		# list all but one duplicates
-		$1==hash {
-			hash=$1
-			$1=""
-			sub(/^[ \t\r\n]+/, "", $0)
-			#print "echo trashing duplicate $0"
-			#print "mv \"" $0 "\" '$DIR_RCY'"
-			printf "\"" $0 "\", "
-			next}
-		{hash=$1}
-		' |#
-	sed "s/, $//"
-) }
-try
-	-- convert posix paths to Finder file specifiers
-	repeat with thisFile in theFiles
-		log "trashing duplicate " & thisFile
-		set (contents of thisFile) to POSIX file thisFile
-	end repeat
-	-- move all identified files to Trash at once
-	tell application "Finder"
-		delete theFiles
-	end tell
-end try
-EOF
+	sort -u
+); do
+	echo "candidate $candidate" >/dev/stderr
+	# use checksums to identify duplicates
+	md5 -r "$candidate"
+done |#
+sort |#
+uniq -D -w 32 |#
+awk '
+# list all but one duplicates
+$1==hash {
+	hash=$1
+	$1=""
+	sub(/^[ \t\r\n]+/, "", $0)
+	print "echo trashing duplicate" $0
+	print "mv \"" $0 "\" '$TRASH'"
+	next}
+{hash=$1}
+' |#
+sh

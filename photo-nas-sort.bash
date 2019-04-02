@@ -56,7 +56,7 @@ NAS_CAR=${NAS_MNT%/}/EDIT/SideCar/     # for side-car files from DxO PhotoLab, C
 NAS_EDT=${NAS_MNT%/}/EDIT/             # for edited images and sidecars
 NAS_ERR=${NAS_MNT%/}/ERROR/            # something went wrong, investigate
 NAS_DUP=${NAS_MNT%/}/ERROR/DUPLICATE/  # duplicate files are not deleted but put here
-NAS_RAW=${NAS_MNT%/}/ORIGINAL/         # for original files (RAW, DNG, JPG, ...)
+NAS_ORG=${NAS_MNT%/}/ORIGINAL/         # for original files (RAW, DNG, JPG, ...)
 NAS_SRC=${NAS_MNT%/}/INBOX/            # files are moved from here to their destinations
 
 # regular expressions
@@ -65,15 +65,15 @@ NAS_SRC=${NAS_MNT%/}/INBOX/            # files are moved from here to their dest
 RGX_DAT="[12][09][0-9][0-9][01][0-9][0-3][0-9]-[012][0-9][0-5][0-9][0-6][0-9]"
 RGX_DAY="[12][09][0-9][0-9][01][0-9][0-3][0-9]"
 
-# file name extension for archive file and its side-car, like "ext1|ext2"
+# file name extension for archive file and its side-car, like "dng|xmp"
 RGX_ARC="dng|xmp"
-# file name extensions for side car files, like "ext1|ext2|..."
+# file name extensions for side car files, like "dop|xmp|..."
 RGX_CAR="cos|dop|nks|pp3|.?s.spd"
-# file name extensions for edited image files, like "ext1|ext2|..."
+# file name extensions for edited image files, like "pdf|psd|..."
 RGX_EDT="afphoto|bmp|eps|ico|pdf|psd"
-# file name extensions for regular image files, like "ext1|ext2|..."
+# file name extensions for regular image files, like "jpg|png|..."
 RGX_IMG="gif|jpeg|jpg|png|tif|tiff"
-# file name extensions for RAW image files, like "ext1|ext2|..."
+# file name extensions for RAW image files, like "arw|raw|..."
 RGX_RAW="3fr|3pr|ari|arw|bay|cap|ce1|ce2|cib|cmt|cr2|craw|crw|dc2|dcr|dcs|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"
 
 
@@ -95,10 +95,12 @@ cd "${NAS_SRC%/}"
 [[ -d "${NAS_DUP}" ]] || ( mkdir -p "${NAS_DUP}" && printWarn "Permanently created ${NAS_DUP}" )
 [[ -d "${NAS_EDT}" ]] || ( mkdir -p "${NAS_EDT}" && printWarn "Permanently created ${NAS_EDT}" )
 [[ -d "${NAS_ERR}" ]] || ( mkdir -p "${NAS_ERR}" && printWarn "Permanently created ${NAS_ERR}" )
-[[ -d "${NAS_RAW}" ]] || ( mkdir -p "${NAS_RAW}" && printWarn "Permanently created ${NAS_RAW}" )
+[[ -d "${NAS_ORG}" ]] || ( mkdir -p "${NAS_ORG}" && printWarn "Permanently created ${NAS_ORG}" )
 [[ -d "${NAS_SRC}" ]] || ( mkdir -p "${NAS_SRC}" && printWarn "Permanently created ${NAS_SRC}" )
 
 printToLog "${0} started"
+
+echo "Files to sort  : $(find $NAS_SRC ! -name '.*' -type f | wc -l)"
 
 # I. Find original raw files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
 printInfo "I.   Find original raw files and move to ORIGINAL ------------------"
@@ -110,7 +112,7 @@ find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -
 	yy="${fn:0:4}"     # year
 	mm="${fn:4:2}"     # month
 	dd="${fn:6:2}"     # day
-	ddir="${NAS_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+	ddir="${NAS_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files
 	# 1.1.     if identical remove current, keep destination
@@ -166,7 +168,7 @@ find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -
 	yy="${fn:0:4}"     # year
 	mm="${fn:4:2}"     # month
 	dd="${fn:6:2}"     # day
-	ddir="${NAS_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+	ddir="${NAS_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files
 	# 1.1. if identical remove current, keep destination
