@@ -311,7 +311,7 @@ Movies are recognised by their file extension:
 
 RAW images are recognised by their file extension:
 
-    .3fr .3pr .ari .arw .bay .cap .ce1 .ce2 .cib .cmt .cr2 .craw
+    .3fr .3pr .ari .arw .bay .cap .ce[12] .cib .cmt .cr[23] .craw
     .crw .dc2 .dcr .dcs .dng .eip .erf .exf .fff .fpx .gray
     .grey .gry .iiq .kc2 .kdc .kqp .lfr .mdc .mef .mfw .mos .mrw
     .ndd .nef .nop .nrw .nwb .olr .orf .pcd .pef .ptx .r3d .ra2
@@ -489,7 +489,7 @@ DIR_TMP=~/Pictures/REVIEW/tmp_sortphotos/
 RGX_EDT="afphoto|bmp|eps|ico|pdf|psd"
 RGX_ERR="app|dmg|icbu|imovielibrary|keynote|oo3|mpkg|numbers|pages|potoslibrary|pkg|theater|webarchive"
 RGX_MOV="3g2|3gp|aae|asf|avi|drc|flv|f4v|f4p|f4a|f4b|lrv|m4v|mkv|modmoi|mov|qt|mp4|m4p|mpg|mp2|mpeg|mpe|mpv|mpg|mpeg|m2v|ogv|ogg|pgi|rm|mvb|roq|svi|vob|webm|wmv|yuv"
-RGX_RAW="3fr|3pr|ari|arw|bay|cap|ce1|ce2|cib|cmt|cr2|craw|crw|dc2|dcr|dcs|dng|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"
+RGX_RAW="3fr|3pr|ari|arw|bay|cap|ce[12]|cib|cmt|cr[23]|craw|crw|dc2|dcr|dcs|dng|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"
 
 cd $DIR_SRC
 # move errornous files out of the way

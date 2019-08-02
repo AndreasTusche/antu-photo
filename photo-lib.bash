@@ -19,6 +19,11 @@
 # @version    $Revision: 0.0 $
 # @(#) $Id: . Exp $
 #
+# when       who  what
+# 2018-12-30 AnTu created
+# 2019-08-02 AnTu export functions to call this file only once
+
+(($DEBUG)) && echo "[sourced $( readlink -f "$BASH_SOURCE" )]"
 
 # coloured error message
 function printDebug {
@@ -43,3 +48,12 @@ function printWarn {
 }
 
 
+# make functions globally available
+export -f printDebug
+export -f printError
+export -f printInfo
+export -f printToLog
+export -f printWarn
+
+# Do not remove or alter this last line:
+export PHOTO_LIB_DONE=1

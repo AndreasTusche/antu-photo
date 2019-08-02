@@ -1,24 +1,24 @@
 #!/bin/bash
 #
 # NAME
-#   photo-extract-gps.bash - recursively extract GPS coordinates from image files
+#	photo-extract-gps.bash - recursively extract GPS coordinates from image files
 # 
 # SYNOPSIS
-#   photo-extract-gps.bash DIRNAME
+#	photo-extract-gps.bash DIRNAME
 #
 # DESCRIPTION
-#   This extracts GPS geo-location information from files in the given
-#   directory and subfolders and writes the result in GPX format to stdout.
+#	This extracts GPS geo-location information from files in the given
+#	directory and subfolders and writes the result in GPX format to stdout.
 #
 # OPTIONS
-#   DIRNAME defaults to the present working directory
+#	DIRNAME defaults to the present working directory
 #
 # FILES
-# Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/geotag.html)
+#	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/geotag.html)
 #
 # AUTHOR
 # @author     Andreas Tusche
-# @copyright  (c) 2017, Andreas Tusche 
+# @copyright  (c) 2017-2019, Andreas Tusche 
 # @package    antu-photo
 # @version    $Revision: 0.0 $
 # @(#) $Id: . Exp $

@@ -11,12 +11,10 @@
 #	checksums of files with the same base name (i.e. up to the date and time
 #	stamp). It then moves all but one of the duplicate files to the User's
 #	Trash directory.
-#	In order to benefit from Apple's "Put Back" function, this script uses
-#	Apple Script functions.
 #
 # OPTIONS
 #   INDIR  This directory and all its subdirectories are searched for files
-#	       with the file name tsrating in a timestamp like "yyyymmdd-HHMMSS".
+#	       with the file name starting in a timestamp like "yyyymmdd-HHMMSS".
 #          Defaults to the present working directory
 #
 #	TODIR  A directory with a subdirectory structure ""./yyyy/yyyy-mm-dd/" which
@@ -33,25 +31,30 @@
 # when       who  what
 # 2018-12-29 AnTu created
 
-DEBUG=1
+# config
+#DEBUG=1
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+
 
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 TODIR="$(  readlink -f "${2:-${DIR_PIC_2%/}}" )"
 TRASH="$(  readlink -f "${3:-${DIR_RCY%/}}" )"
 
-(($DEBUG)) && echo "--- trash-duplicates"
-(($DEBUG)) && echo "... INDIR  = $INDIR"
-(($DEBUG)) && echo "... TODIR  = $TODIR"
-(($DEBUG)) && echo "... TRASH  = $TRASH"
+printToLog "--- ${0##*/} called"
+printToLog "... INDIR = $INDIR"
+printToLog "... TODIR = $TODIR"
+printToLog "... TRASH = $TRASH"
 
 #if [[ "${INDIR%/}" == "${DIR_SRC_2%/}" || "${INDIR%/}" == "${DIR_TMP%/}" ]]; then
-	(($DEBUG)) && echo "... compare all files from ${INDIR%/}"
+	printInfo "... compare all files from ${INDIR%/}"
 	RGX=".*/${RGX_DAT%/}.*"
 #else
-#	(($DEBUG)) && echo "... compare files with sequence number"
+#	printInfo "... compare files with sequence number"
 #	RGX=".*/${RGX_DAT%/}_[0-9]+(_[0-9]+)?\..*"
 #fi
 
@@ -69,7 +72,7 @@ for candidate in $(
 			mm="${fn:4:2}"     # month
 			dd="${fn:6:2}"     # day
 			# list files of same basename
-			echo "searching files of date $bn" >/dev/stderr
+			printInfo "... searching files of date $bn"
 			if [[ "${INDIR%/}" != "${TODIR%/}" ]] ; then
 				ls -1 "${TODIR%/}/$yy/$yy-$mm-$dd/$bn"* 2>/dev/null
 			fi
@@ -77,7 +80,7 @@ for candidate in $(
 		done |#
 	sort -u
 ); do
-	echo "candidate $candidate" >/dev/stderr
+	printInfo "... ... candidate $candidate"
 	# use checksums to identify duplicates
 	md5 -r "$candidate"
 done |#
@@ -89,7 +92,7 @@ $1==hash {
 	hash=$1
 	$1=""
 	sub(/^[ \t\r\n]+/, "", $0)
-	print "echo trashing duplicate" $0
+	print "echo \"       ... ... trashing duplicate\"" $0
 	print "mv \"" $0 "\" '$TRASH'"
 	next}
 {hash=$1}

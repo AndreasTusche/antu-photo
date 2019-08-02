@@ -8,7 +8,7 @@
 #
 # DESCRIPTION
 # Photos are expected to already have final desired filenames, e.g.
-# 	YYYYMMDD-hhmmss[_f].xxx
+# 	YYYYMMDD-hhmmss[_ff].xxx
 # and are located in the NAS::Pictures/INBOX folder. This script moves
 # 	* original images from     NAS::Pictures/INBOX/ and subfolders
 #                     to       NAS::Pictures/ORIGINAL/YYYY/YYYY-MM-DD/
@@ -43,8 +43,8 @@
 #
 
 # default config
-DEBUG=0
-VERBOSE=1
+#DEBUG=0
+#VERBOSE=1
 
 if [[ "${OSTYPE:0:6}" == "darwin" ]]; then MAC=1; fi
 if [[ "${OSTYPE:0:6}" == "cygwin" ]]; then WIN=1; fi
@@ -102,7 +102,7 @@ printToLog "${0} started"
 
 echo "Files to sort  : $(find $NAS_SRC ! -name '.*' -type f | wc -l)"
 
-# I. Find original raw files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
+# I. Find original raw files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "I.   Find original raw files and move to ORIGINAL ------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
@@ -158,7 +158,7 @@ done
 
 
 
-# II. Find other original image files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
+# II. Find other original image files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "II.  Find other original image files and move to ORIGINAL ----------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
@@ -212,7 +212,7 @@ done
 
 
 
-# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
+# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "III. Find other image files and move to EDIT  ----------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT}|${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
@@ -251,7 +251,7 @@ done
 
 
 
-# IV. Find archive files and move to ARCHIV/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
+# IV. Find archive files and move to ARCHIV/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "IV.  Find archive files and move to ARCHIV -------------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_ARC})" -type f -print0 | while IFS= read -r -d $'\0' file; do
@@ -290,7 +290,7 @@ done
 
 
 
-# V. Find SideCar files and move to EDIT/SideCar/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_f].ext
+# V. Find SideCar files and move to EDIT/SideCar/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 
 printInfo "V.   Find SideCar files and move to EDIT ---------------------------"
 
