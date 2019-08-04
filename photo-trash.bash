@@ -23,8 +23,14 @@
 # 2017-04-15 AnTu created
 # 2018-10-03 AnTu trash both, image and RAW
 
+# config
+#DEBUG=1
+
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
 
 
 cd ${DIR_RCY}

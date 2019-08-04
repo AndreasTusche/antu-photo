@@ -72,7 +72,7 @@ for candidate in $(
 			mm="${fn:4:2}"     # month
 			dd="${fn:6:2}"     # day
 			# list files of same basename
-			printInfo "... searching files of date $bn"
+			printDebug "... searching files of date $bn"
 			if [[ "${INDIR%/}" != "${TODIR%/}" ]] ; then
 				ls -1 "${TODIR%/}/$yy/$yy-$mm-$dd/$bn"* 2>/dev/null
 			fi
@@ -80,7 +80,7 @@ for candidate in $(
 		done |#
 	sort -u
 ); do
-	printInfo "... ... candidate $candidate"
+	printDebug "... ... candidate $candidate"
 	# use checksums to identify duplicates
 	md5 -r "$candidate"
 done |#

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # NAME
-# antu_extractphotolibrary.bash - rerieve photos from Apple Photo Libraries
+# antu_extractphotolibrary.bash - retrieve photos from Apple Photo Libraries
 #
 # SYNOPSIS
 # antu_extractphotolibrary.bash LIBRARY

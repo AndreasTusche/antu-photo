@@ -34,9 +34,13 @@
 
 # config
 DIR_PIC=~/Pictures/sorted/
+#DEBUG=1
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg"  2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
  
 #INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 #OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"

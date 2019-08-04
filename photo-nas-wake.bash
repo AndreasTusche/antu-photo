@@ -22,6 +22,7 @@
 #
 
 # default configs
+#DEBUG=1
 NAS_URL=""  # from config file         # The NAS URL should read "afp://User:Password@Server/Directory"
 NAS_MNT=/Volumes/Pictures              # Mount point for NAS pictures directory
 NAS_BRD=""  # auto detect              # Wake-On-LAN Network Broadcast Address (e.g. 255.255.255.255) keep empty for auto-detect
@@ -30,8 +31,12 @@ NAS_PRT=9                              # Wake-On-LAN PortNumber (e.g. 9)
 NAS_SEC=124                            # seconds after wake up the NAS should be available
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
-source "$LIB_antu_photo"
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+
+
 
 # === MAIN ===
 

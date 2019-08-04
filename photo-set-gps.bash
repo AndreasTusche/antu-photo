@@ -32,12 +32,16 @@
 # 2017-04-17 AnTu created
 
 # config ( will be overwritten if config file exists )
+#DEBUG=1
 GPS_FMT="${0%/*}/gpx.fmt"
 GPS_LOG=gps.gpx #@ToDo: extract date info and have output to yyyymmdd.gpx
 
-
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+ 
  
 #INDIR="$( readlink -f "${1:-$(pwd)}" )"
 INDIR="${1:-$(pwd)}"
