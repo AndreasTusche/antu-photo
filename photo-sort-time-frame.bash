@@ -21,7 +21,7 @@
 #   OUTDIR defaults to ~/Pictures/sorted/
 #
 # FILES
-# Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
+#	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
 # AUTHOR
 # @author     Andreas Tusche
@@ -31,8 +31,11 @@
 # @(#) $Id: . Exp $
 #
 # when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2017-04-15 AnTu created
 # 2018-12-30 AnTu now checking for SequenceNumber
+
+
 
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then

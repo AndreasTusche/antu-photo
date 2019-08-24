@@ -20,25 +20,23 @@
 # @version    $Revision: 0.0 $
 # @(#) $Id: . Exp $
 #
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
+# 2018-12-30 AnTu created
 
-# default configs
-#DEBUG=1
-NAS_URL=""  # from config file         # The NAS URL should read "afp://User:Password@Server/Directory"
-NAS_MNT=/Volumes/Pictures              # Mount point for NAS pictures directory
-NAS_BRD=""  # auto detect              # Wake-On-LAN Network Broadcast Address (e.g. 255.255.255.255) keep empty for auto-detect
-NAS_MAC=""  # from config file         # the NAS MAC Address
-NAS_PRT=9                              # Wake-On-LAN PortNumber (e.g. 9)
-NAS_SEC=124                            # seconds after wake up the NAS should be available
+# default config
+#export DEBUG=1
+export VERBOSE=1
 
 # --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 fi
 (($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
 
 
 
-# === MAIN ===
+# === MAIN =====================================================================
 
 # Check for NAS directory and wake up the NAS, if needed
 

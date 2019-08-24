@@ -15,11 +15,11 @@
 #	                to       ~/Pictures/YYYY/YYYY-MM-DD/
 #
 # AUTHOR
-#	@author     Andreas Tusche
-#	@copyright  (c) 2019, Andreas Tusche
-#	@package    antu-photo
-#	@version    $Revision: 0.0 $
-#	@(#) $Id: . Exp $
+# @author     Andreas Tusche
+# @copyright  (c) 2019, Andreas Tusche
+# @package    antu-photo
+# @version    $Revision: 0.0 $
+# @(#) $Id: . Exp $
 #
 # 2019-08-01 AnTu initial version
 

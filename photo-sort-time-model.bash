@@ -20,7 +20,7 @@
 #   OUTDIR defaults to ~/Pictures/sorted/
 #
 # FILES
-# Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
+#	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
 # AUTHOR
 # @author     Andreas Tusche
@@ -30,6 +30,7 @@
 # @(#) $Id: . Exp $
 #
 # when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2017-04-14 AnTu created
 
 # config
