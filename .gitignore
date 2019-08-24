@@ -1,6 +1,10 @@
 .DS_Store
 .git*
-Desktop.ini
+.localized
+*.log
 $RECYCLE.BIN/
+Desktop.ini
+on_NAS/*/
+on_NAS/all_md5sum.txt
 Thumbs.db
 TODO.md

@@ -1,4 +1,5 @@
 # -*- mode: xml -*-
+#
 # NAME
 #   gpx.fmt - ExifTool print format file for generating GPX track log
 #
@@ -11,18 +12,19 @@
 #   Only input files that contain GPSLatitude and GPSLongitude are considered.
 #
 # FILES
-# Requires exiftool 8.10 or later
-#   (http://www.sno.phy.queensu.ca/~phil/exiftool/geotag.html)
+#	Requires exiftool 8.10 or later
+#	(http://www.sno.phy.queensu.ca/~phil/exiftool/geotag.html)
 #
 # AUTHOR
-# @author     Andreas Tusche
-# @package    antu-photo
-# @version    $Revision: 0.0 $
-# @(#) $Id: . Exp $
+# 	@author     Andreas Tusche
+# 	@package    antu-photo
+# 	@version    $Revision: 0.0 $
+# 	@(#) $Id: . Exp $
 #
-# when       who         what
-# 2010-05-05 Phil Harvey created
-# 2017-04-17 AnTu        extended by name and number tags
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
+# 2010-02-05 PhHa Phil Harvey created it
+# 2017-04-17 AnTu extended by name and number tags
 #-------------------------------------------------------------------------------
 #
 #[HEAD]<?xml version="1.0" encoding="utf-8"?>

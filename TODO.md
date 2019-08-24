@@ -7,8 +7,11 @@
 	
 * Check to have at least one EDIT file per ORIGINAL
 	- if not create one using e.g. DxO
-	
-	
+
+* Have new Directory IMG for unedited images (was former EDIT) and create new EDIT for manually edited ones.
+
+* Check for exif entry `Software                        : DxO OpticsPro .*` and put them to EDIT
+
 	
 	
 	
