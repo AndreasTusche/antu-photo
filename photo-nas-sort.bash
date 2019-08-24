@@ -1,88 +1,63 @@
 #!/bin/bash
 #
 # NAME
-# photo-nas-sort.bash - sort original photos from NAS INBOX to folders
+#	photo-nas-sort.bash - sort original photos from NAS INBOX to folders
 #
 # SYNOPSIS
-# photo-nas-sort.bash
+#	photo-nas-sort.bash
 #
 # DESCRIPTION
-# Photos are expected to already have final desired filenames, e.g.
-# 	YYYYMMDD-hhmmss[_ff].xxx
-# and are located in the NAS::Pictures/INBOX folder. This script moves
+#	This script is to be run on main computer which has the NAS mounted,
+#	not to be run on the NAS itself.
+#
+#	Photos are expected to already have final desired filenames, e.g.
+# 		YYYYMMDD-hhmmss[_ff].xxx
+#	and are located in the NAS::Pictures/INBOX folder.
+#
+#	This script moves
 # 	* original images from     NAS::Pictures/INBOX/ and subfolders
 #                     to       NAS::Pictures/ORIGINAL/YYYY/YYYY-MM-DD/
+# 	* derived images  from     NAS::Pictures/INBOX/ and subfolders
+#                     to       NAS::Pictures/EDIT/YYYY/YYYY-MM-DD/
 #	* created DNG     from     NAS::Pictures/INBOX/ and subfolders
 #                     to       NAS::Pictures/ARCHIV/YYYY/YYYY-MM-DD/
-#	* 4K JPGs         from     NAS::Pictures/INBOX/ and subfolders
-#                     to       NAS::Pictures/JPG4K/YYYY/YYYY-MM-DD/
 #
-# The default direcories names can be overwritten by the antu-photo.cfg file.
-#
-# Raw images are recognised by their file extension:
-#  .3fr .3pr .ari .arw .bay .cap .ce1 .ce2 .cib .cmt .cr2 .craw .crw .dc2
-#  .dcr .dcs .dng .eip .erf .exf .fff .fpx .gray .grey .gry .iiq .kc2 .kdc
-#  .kqp .lfr .mdc .mef .mfw .mos .mrw .ndd .nef .nop .nrw .nwb .olr .orf
-#  .pcd .pef .ptx .r3d .ra2 .raf .raw .rw2 .rwl .rwz .sd[01] .sr2 .srf .srw
-#  .st[45678] .stx .x3f .ycbcra
+#	Above direcories names may be overwritten by the antu-photo.cfg file.
 #
 # FILES
+#	antu-photo.cfg - configuration file
 #
 # BUGS
 #   - Companion files from 3rd party software are not renamed and may loose
 #     their intended function.
-#	@ToDo compare filenames only for timestamps not sequence numbers, see also trash-duplicates.
-#	@ToDO if new sequence numbers are needed then use two digits
+# @ToDo compare filenames only for timestamps not sequence numbers, see also trash-duplicates.
+# @ToDo if new sequence numbers are needed then use two digits
+#	- to be run on main computer which has NAS mounted, not on NAS itself
 #
 # AUTHOR
-# @author     Andreas Tusche
-# @copyright  (c) 2018, Andreas Tusche
-# @package    antu-photo
-# @version    $Revision: 0.0 $
-# @(#) $Id: . Exp $
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2018-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
+# 2018-12-30 AnTu created
 
 # default config
-#DEBUG=0
-#VERBOSE=1
-
-if [[ "${OSTYPE:0:6}" == "darwin" ]]; then MAC=1; fi
-if [[ "${OSTYPE:0:6}" == "cygwin" ]]; then WIN=1; fi
-
-# Your preferred destination directories on the NAS
-NAS_MNT=/Volumes/Pictures              # Mount point for NAS pictures directory
-NAS_ARC=${NAS_MNT%/}/ARCHIV/           # for created DNG images and XMP sidecars
-NAS_CAR=${NAS_MNT%/}/EDIT/SideCar/     # for side-car files from DxO PhotoLab, Capture 1, etc.
-NAS_EDT=${NAS_MNT%/}/EDIT/             # for edited images and sidecars
-NAS_ERR=${NAS_MNT%/}/ERROR/            # something went wrong, investigate
-NAS_DUP=${NAS_MNT%/}/ERROR/DUPLICATE/  # duplicate files are not deleted but put here
-NAS_ORG=${NAS_MNT%/}/ORIGINAL/         # for original files (RAW, DNG, JPG, ...)
-NAS_SRC=${NAS_MNT%/}/INBOX/            # files are moved from here to their destinations
-
-# regular expressions
-# file name part for timestamp, like "yyyymmdd-hhmmss", expecting years 1900-2099
-#        |yyyy-------------|mm------|dd-------||hh-------|mm-------|ss-------|
-RGX_DAT="[12][09][0-9][0-9][01][0-9][0-3][0-9]-[012][0-9][0-5][0-9][0-6][0-9]"
-RGX_DAY="[12][09][0-9][0-9][01][0-9][0-3][0-9]"
-
-# file name extension for archive file and its side-car, like "dng|xmp"
-RGX_ARC="dng|xmp"
-# file name extensions for side car files, like "dop|xmp|..."
-RGX_CAR="cos|dop|nks|pp3|.?s.spd"
-# file name extensions for edited image files, like "pdf|psd|..."
-RGX_EDT="afphoto|bmp|eps|ico|pdf|psd"
-# file name extensions for regular image files, like "jpg|png|..."
-RGX_IMG="gif|jpeg|jpg|png|tif|tiff"
-# file name extensions for RAW image files, like "arw|raw|..."
-RGX_RAW="3fr|3pr|ari|arw|bay|cap|ce1|ce2|cib|cmt|cr2|craw|crw|dc2|dcr|dcs|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"
-
+#export DEBUG=1
+export VERBOSE=1
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
-source "$LIB_antu_photo"
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
 
 
-# === MAIN ===
+
+# === MAIN =====================================================================
 
 # Check for NAS directory and wake up the NAS, if needed
 if [[ ! -e "$NAS_SRC" ]]; then $CMD_wakeup_nas ; fi
@@ -100,18 +75,25 @@ cd "${NAS_SRC%/}"
 
 printToLog "${0} started"
 
-echo "Files to sort  : $(find $NAS_SRC ! -name '.*' -type f | wc -l)"
+#echo "Files to sort  : $(find ${NAS_SRC%/} ! -name '.*' -type f)"
+echo "Files to sort  : $(find ${NAS_SRC%/} ! -name '.*' -type f | wc -l)"
+
 
 # I. Find original raw files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "I.   Find original raw files and move to ORIGINAL ------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name
-	ex="${fn##*.}"     # file extension
-	yy="${fn:0:4}"     # year
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_1.jpg.~3~
+	dn="${file%/*}"    # directory name                        /path1/path2
+	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
+	ex="${b0#*.}"      # extension                             jpg
+	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       1
+	yy="${fn:0:4}"     # year                                  2017
+	mm="${fn:4:2}"     # month                                 03
+	dd="${fn:6:2}"     # day                                   20
 	ddir="${NAS_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files
@@ -162,12 +144,17 @@ done
 printInfo "II.  Find other original image files and move to ORIGINAL ----------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name
-	ex="${fn##*.}"     # file extension
-	yy="${fn:0:4}"     # year
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_1.jpg.~3~
+	dn="${file%/*}"    # directory name                        /path1/path2
+	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
+	ex="${b0#*.}"      # extension                             jpg
+	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       1
+	yy="${fn:0:4}"     # year                                  2017
+	mm="${fn:4:2}"     # month                                 03
+	dd="${fn:6:2}"     # day                                   20
 	ddir="${NAS_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files
@@ -216,12 +203,17 @@ done
 printInfo "III. Find other image files and move to EDIT  ----------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT}|${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name
-	ex="${fn##*.}"     # file extension
-	yy="${fn:0:4}"     # year
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_1.jpg.~3~
+	dn="${file%/*}"    # directory name                        /path1/path2
+	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
+	ex="${b0#*.}"      # extension                             jpg
+	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       1
+	yy="${fn:0:4}"     # year                                  2017
+	mm="${fn:4:2}"     # month                                 03
+	dd="${fn:6:2}"     # day                                   20
 	ddir="${NAS_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files
@@ -255,12 +247,17 @@ done
 printInfo "IV.  Find archive files and move to ARCHIV -------------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_ARC})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name
-	ex="${fn##*.}"     # file extension
-	yy="${fn:0:4}"     # year
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_1.jpg.~3~
+	dn="${file%/*}"    # directory name                        /path1/path2
+	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
+	ex="${b0#*.}"      # extension                             jpg
+	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       1
+	yy="${fn:0:4}"     # year                                  2017
+	mm="${fn:4:2}"     # month                                 03
+	dd="${fn:6:2}"     # day                                   20
 	ddir="${NAS_ARC%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo echo "$fn"
 	# 1.   If destination exists and has same filename, compare files
@@ -295,12 +292,17 @@ done
 printInfo "V.   Find SideCar files and move to EDIT ---------------------------"
 
 find ${MAC:+-E} . -iregex ".*/(${RGX_DAT}|${RGX_DAY})(_[0-9][0-9]?)?.*\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name
-	ex="${fn##*.}"     # file extension
-	yy="${fn:0:4}"     # year
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_1.jpg.~3~
+	dn="${file%/*}"    # directory name                        /path1/path2
+	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
+	ex="${b0#*.}"      # extension                             jpg
+	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       1
+	yy="${fn:0:4}"     # year                                  2017
+	mm="${fn:4:2}"     # month                                 03
+	dd="${fn:6:2}"     # day                                   20
 	ddir="${NAS_CAR%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 	printInfo "$fn"
 	# 1.   If destination exists and has same filename, compare files (md5?)
