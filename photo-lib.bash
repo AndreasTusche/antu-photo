@@ -13,13 +13,14 @@
 #	- printWarn
 #
 # AUTHOR
-# @author     Andreas Tusche    <antu-photo@andreas-tusche.de>
-# @copyright  (c) 2018, Andreas Tusche <www.andreas-tusche.de>
-# @package    antu-photo
-# @version    $Revision: 0.0 $
-# @(#) $Id: . Exp $
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
 # when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2018-12-30 AnTu created
 # 2019-08-02 AnTu export functions to call this file only once
 

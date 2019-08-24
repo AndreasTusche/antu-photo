@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 # NAME
 # antu_extractphotolibrary.bash - retrieve photos from Apple Photo Libraries
 #
@@ -8,7 +8,16 @@
 #
 # DESCRIPTION
 #  * recursevly moves photos from  LIBRARY/Masters/ to ~/Pictures/
- 
+#
+# AUTHOR
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
+#
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2015-11-05 AnTu initial version
 
 DIR_PIC=~/Pictures/

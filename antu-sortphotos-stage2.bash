@@ -15,12 +15,14 @@
 #	                to       ~/Pictures/YYYY/YYYY-MM-DD/
 #
 # AUTHOR
-# @author     Andreas Tusche
-# @copyright  (c) 2019, Andreas Tusche
-# @package    antu-photo
-# @version    $Revision: 0.0 $
-# @(#) $Id: . Exp $
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2019-08-01 AnTu initial version
 
 ${0%/*}/antu-sortphotos.bash --stage2

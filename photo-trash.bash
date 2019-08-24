@@ -13,11 +13,11 @@
 #	2nd: for each image trash the corresponding RAW
 #
 # AUTHOR
-# @author     Andreas Tusche
-# @copyright  (c) 2017, Andreas Tusche 
-# @package    antu-photo
-# @version    $Revision: 0.0 $
-# @(#) $Id: . Exp $
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
 #
 # when       who  what
 # ---------- ---- --------------------------------------------------------------

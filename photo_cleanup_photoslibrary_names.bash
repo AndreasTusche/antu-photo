@@ -1,5 +1,14 @@
 #!/bin/bash
-
+#
+# AUTHOR
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#	@version    $Revision: 0.0 $
+#	@(#) $Id: . Exp $
+#
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2015-11-08 AnTu initial version
 
 DIR_PIC=~/Pictures/2015/
