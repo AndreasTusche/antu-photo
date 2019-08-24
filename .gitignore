@@ -4,7 +4,6 @@
 *.log
 $RECYCLE.BIN/
 Desktop.ini
-on_NAS/*/
-on_NAS/all_md5sum.txt
+on_NAS/
 Thumbs.db
 TODO.md
