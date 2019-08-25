@@ -23,8 +23,8 @@ The workflow is modelled mainly to support these two main requirements:
 ## The workflow
 
 1) [Take photos](#take-photos) - in RAW, JPG or both.
-2) [Copy photos to computer](#copy-photos-to-computer) to local Inbox directory - using [`photo-import-sd.bash`](#photo-import-sd) 
-3) [Pre-Sort photos](#pre-sort-photos) - using [`antu-sortphotos.bash`](#antu-sortphotos)
+2) [Copy photos to computer](#copy-photos-to-computer) to local Inbox directory 
+3) [Pre-Sort photos](#pre-sort-photos)
 4) [Review images](#review-images) and trash unwanted
 5) Archive best originals, e.g. RAW if available
 6) Convert best originals into format for the catalogue
@@ -257,7 +257,7 @@ I copy _all_ photos I took from the camera SD card to the Inbox:
 
     ~/Pictures/INBOX/
 
-Doing this step manually usually avoids creating duplicates. The original files stay on the SD card until I have at least properly archived these new files. If I accidentally corrupt the new files on my computer, one of my scripts develop its own mind or if something else goes wrong, then I always can start over, going back to the originals on the SD card.
+Doing this step manually usually avoids creating duplicates. The original files stay on the SD card until I have at least properly archived these new files. If I accidentally corrupt the new files on my computer, if one of my scripts develops its own mind or if something else goes wrong, then I always can start over, going back to the originals on the SD card.
 
 Copying can be done using the Finder or, as I prefer it, from the Unix command line, using `rsync`. In case of partial transfers the incomplete files should be kept away in a dedicated directory. So I type
 

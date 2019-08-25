@@ -12,6 +12,5 @@
 
 * Check for exif entry `Software                        : DxO OpticsPro .*` and put them to EDIT
 
-	
-	
+* Check usage of unique IDs, e.g. `uuidgen` or ExifTool `NewGUID`
 	
