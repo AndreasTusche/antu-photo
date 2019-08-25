@@ -19,28 +19,21 @@
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
 # 2015-11-05 AnTu initial version
+# 2019-08-25 AnTu use library functions
 
-DIR_PIC=~/Pictures/
+# default config
+export DEBUG=1
+export VERBOSE=1
 
-# -------------------------------------
-# MAIN
-# -------------------------------------
+# --- nothing beyond this line needs configuration -----------------------------
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+
+# === MAIN =====================================================================
+
 if [ "$1" == "" ]; then exit ; fi
-
 cd "$1"
 find Masters -type f -exec mv -v --backup=t "{}" ${DIR_PIC} \;
-
-for f in *.~*; do
-	n=${f%~*}
-	e=${f#*.}
-	mv -n -v "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-done	
-
-for f in *_[1-9].*; do
-	cmp "${f}" "${f%_*}.${f##*.}" 2>/dev/null
-
-	if [ $? == 0 ]; then
-		rm "$f"
-	fi
-
-done
+photo_align_backup_file_names "."

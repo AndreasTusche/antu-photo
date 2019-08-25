@@ -25,8 +25,8 @@
 #	Before actually working on the photos, unwanted files - e.g. those
 #	'Packages' which are actually directries on Mac OS X - are moved to a
 #	separate folder. They are recognised by their file extension:
-#		.app .bin .cocatalog .dmg .icbu .imovielibrary .keynote .oo3 .mpkg
-#		.numbers .pages .photoslibrary .pkg .theater .webarchive
+#		.app .bin .cocatalog .ctg .dmg .icbu .imovielibrary .keynote .oo3 .mpkg
+#		.numbers .pages .photoslibrary .pkg .theater .thm .webarchive
 #
 #	Movies are sorted first. They are recognised by their file extension:
 #		.3g2 .3gp .aae .asf .avi .drc .flv .f4v .f4p .f4a .f4b .lrv .m4v .mkv
@@ -66,17 +66,20 @@
 #	  and may loose their intended function.
 #
 # AUTHOR
-#	@author     Andreas Tusche
-#	@copyright  (c) 2017-2019, Andreas Tusche
+#	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
 #	@package    antu-photo
 #	@version    $Revision: 0.0 $
 #	@(#) $Id: . Exp $
 #
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
 # 2015-11-05 AnTu initial version using sortphoto python script
 # 2015-12-05 AnTu added --stage2 option
 # 2017-04-09 AnTu got rid of python script, now using exiftool directly
-# 2018-12-30 AnTu added call to trash-dupliactes
+# 2018-12-30 AnTu added call to trash-duplicates
 # 2019-08-02 AnTu check for pictures (JPG, etc.) wich are the only originals
+# 2019-08-24 AnTu have two digit counter for backup-type file names
 
 # default config
 #export DEBUG=1
@@ -105,6 +108,12 @@ fi
 
 # === MAIN =====================================================================
 
+printError "Before running, clean up source code"
+printError "Align sort logic with `photo-nas-sort`."
+exit
+
+
+
 printToLog "*******************************************************************"
 printToLog "${0} started [stage $MYSTAGE]"
 
@@ -116,27 +125,17 @@ mkdir -p "$DIR_ERR"
 if [ "$MYSTAGE" == "1" ] ; then
 # --- stage 1 only -------------------------------------------------------------
 
+	photo_align_backup_file_names "${DIR_SRC%/}"
+
 	# move errornous files out of the way
 	printInfo "Check File Types ..."
 	find ${MAC:+-E} . -iregex ".*\.($RGX_ERR)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_ERR%/}"/ \;
-
-	for f in "${DIR_ERR%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
+	photo_align_backup_file_names "${DIR_ERR%/}"
 
 	# move and rename video clips amd movies
 	printInfo "Movies ..."
 	find ${MAC:+-E} . -iregex ".*\.($RGX_MOV)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
+	photo_align_backup_file_names "${DIR_TMP%/}"
 
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_MOV%/}" ; fi
@@ -146,13 +145,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
 	printInfo "RAW ..."
 	find -E . -iregex ".*\.($RGX_RAW|$RGX_ARC)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
+	photo_align_backup_file_names "${DIR_TMP%/}"
 
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_RAW%/}" ; fi
@@ -162,13 +155,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
 	printInfo "EDIT ..."
 	find ${MAC:+-E} . -iregex ".*\.($RGX_EDT)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-
-	for f in "${DIR_TMP%/}"/*.~*; do
-		if [[ ! -e $f ]]; then break; fi
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	done
+	photo_align_backup_file_names "${DIR_TMP%/}"
 
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_EDT%/}" ; fi
@@ -183,13 +170,7 @@ fi # [ "$MYSTAGE" == "1" ]
 # move and rename all remaining picture files
 printInfo "Pictures ..."
 find ${MAC:+-E} . -iregex ".*\.($RGX_IMG)" -not -path "${DIR_TMP%/}/*" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-
-for f in "${DIR_TMP%/}"/*.~*; do
-	if [[ ! -e $f ]]; then break; fi
-	n=${f%~*}
-	e=${f#*.}
-	mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-done
+photo_align_backup_file_names "${DIR_TMP%/}"
 
 if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_PIC%/}" ; fi
@@ -206,14 +187,20 @@ if [ "$MYSTAGE" == "1" ] ; then
 	printInfo "... find original raw files and copy to RAW"
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		fn="${file##*/}"   # full file name
-		bn="${fn%.*}"      # file base name
-		ex="${fn##*.}"     # file extension
-		yy="${fn:0:4}"     # year
-		mm="${fn:4:2}"     # month
-		dd="${fn:6:2}"     # day
+		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
+		dn="${file%/*}"    # directory name                        /path1/path2
+		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+		n0="${file##*.}"   # full numbering                        ~3~
+		n1="${n0//\~/}"    # numbering                             3
+		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+		ex="${b0#*.}"      # extension(s)                          jpg.dop
+		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
+		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+		sq="${b1#*_}"      # sequence number                       01
+		yy="${fn:0:4}"     # year                                  2017
+		mm="${fn:4:2}"     # month                                 03
+		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
-		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1.     if identical remove current, keep destination
 		# 1.2.     if not identical move current to ERROR
@@ -262,12 +249,19 @@ if [ "$MYSTAGE" == "1" ] ; then
 	printInfo "... find other original image files and copy to RAW"
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		fn="${file##*/}"   # full file name
-		bn="${fn%.*}"      # file base name
-		ex="${fn##*.}"     # file extension
-		yy="${fn:0:4}"     # year
-		mm="${fn:4:2}"     # month
-		dd="${fn:6:2}"     # day
+		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
+		dn="${file%/*}"    # directory name                        /path1/path2
+		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+		n0="${file##*.}"   # full numbering                        ~3~
+		n1="${n0//\~/}"    # numbering                             3
+		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+		ex="${b0#*.}"      # extension(s)                          jpg.dop
+		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
+		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+		sq="${b1#*_}"      # sequence number                       01
+		yy="${fn:0:4}"     # year                                  2017
+		mm="${fn:4:2}"     # month                                 03
+		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files
@@ -316,12 +310,19 @@ if [ "$MYSTAGE" == "1" ] ; then
 	printInfo "... find other image files and move to EDIT"
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		fn="${file##*/}"   # full file name
-		bn="${fn%.*}"      # file base name
-		ex="${fn##*.}"     # file extension
-		yy="${fn:0:4}"     # year
-		mm="${fn:4:2}"     # month
-		dd="${fn:6:2}"     # day
+		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
+		dn="${file%/*}"    # directory name                        /path1/path2
+		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+		n0="${file##*.}"   # full numbering                        ~3~
+		n1="${n0//\~/}"    # numbering                             3
+		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+		ex="${b0#*.}"      # extension(s)                          jpg.dop
+		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
+		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+		sq="${b1#*_}"      # sequence number                       01
+		yy="${fn:0:4}"     # year                                  2017
+		mm="${fn:4:2}"     # month                                 03
+		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files
@@ -357,12 +358,19 @@ if [ "$MYSTAGE" == "1" ] ; then
 	printInfo "... find SideCar files and move to RAW"
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/(${RGX_DAT}|${RGX_DAY})(_[0-9][0-9]?)?.*\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		fn="${file##*/}"   # full file name
-		bn="${fn%.*}"      # file base name
-		ex="${fn##*.}"     # file extension
-		yy="${fn:0:4}"     # year
-		mm="${fn:4:2}"     # month
-		dd="${fn:6:2}"     # day
+		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
+		dn="${file%/*}"    # directory name                        /path1/path2
+		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+		n0="${file##*.}"   # full numbering                        ~3~
+		n1="${n0//\~/}"    # numbering                             3
+		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+		ex="${b0#*.}"      # extension(s)                          jpg.dop
+		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
+		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+		sq="${b1#*_}"      # sequence number                       01
+		yy="${fn:0:4}"     # year                                  2017
+		mm="${fn:4:2}"     # month                                 03
+		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files (md5?)

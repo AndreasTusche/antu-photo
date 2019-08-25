@@ -78,34 +78,20 @@ printToLog "${0} started"
 #echo "Files to sort  : $(find ${NAS_SRC%/} ! -name '.*' -type f)"
 echo "Files to sort  : $(find ${NAS_SRC%/} ! -name '.*' -type f | wc -l)"
 
-# Rename backup-style filenames, if any
-for f in *.~*; do
-	if [[ -e $f ]]; then
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	fi
-done
-
-# convert single digit sequence numbers to two digit
-for f in *_[0-9].*; do
-	if [[ -e $f ]]; then
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%_*}_0${f#*_}"
-	fi
-done
-
-
+photo_align_backup_file_names "./"
 
 # I. Find original raw files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 printInfo "I.   Find original raw files and move to ORIGINAL ------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DSQ}\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.~3~
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
-	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.~3~
-	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg
-	ex="${b0##*.}"     # extension                             jpg
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_01
+	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
 	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
@@ -182,12 +168,14 @@ done
 printInfo "II.  Find other original image files and move to ORIGINAL ----------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DSQ}\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.~3~
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
-	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.~3~
-	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg
-	ex="${b0##*.}"     # extension                             jpg
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_01
+	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
 	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
@@ -262,12 +250,14 @@ done
 printInfo "III. Find other image files and move to EDIT  ----------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DSQ}\.(${RGX_EDT}|${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.~3~
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
-	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.~3~
-	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg
-	ex="${b0##*.}"     # extension                             jpg
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_01
+	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
 	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
@@ -327,12 +317,14 @@ done
 printInfo "IV.  Find archive files and move to ARCHIV -------------------------"
 
 find ${MAC:+-E} . -iregex ".*/${RGX_DSQ}\.(${RGX_ARC})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.~3~
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
-	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.~3~
-	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg
-	ex="${b0##*.}"     # extension                             jpg
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_01
+	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
 	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
@@ -375,9 +367,11 @@ find ${MAC:+-E} . -iregex ".*/(${RGX_DAT}|${RGX_DAY})${RGX_SEQ}.*\.(${RGX_CAR})"
 	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
 	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
 	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
-	ex="${b0##*.}"     # extension                             dop
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_01
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
 	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
