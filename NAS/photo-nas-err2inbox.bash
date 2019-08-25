@@ -13,23 +13,27 @@
 # 2019-08-24 AnTu corrected paths
 
 # --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
-	source "./antu-photo.cfg" 2>/dev/null
-fi
+(($ANTU_PHOTO_CFG_DONE)) || source "./antu-photo.cfg"
+(($PHOTO_LIB_DONE))      || source "$LIB_antu_photo"
 
 for file in ${RMT_ERR%/}/*.*; do
-	#  "${file}"       # full file name with path              /path1/path2/20170320-065042_1.jpg.~3~
+	#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
 	dn="${file%/*}"    # directory name                        /path1/path2
-	fn="${file##*/}"   # full file name                        20170320-065042_1.jpg.~3~
-	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_1.jpg
-	ex="${b0#*.}"      # extension                             jpg
-	b1="${b0%%.*}"     # file base name (w/o extension)        20170320-065042_1
+	fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
+	n0="${file##*.}"   # full numbering                        ~3~
+	n1="${n0//\~/}"    # numbering                             3
+	b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
+	ex="${b0#*.}"      # extension(s)                          jpg.dop
+	b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
 	bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
+	sq="${b1#*_}"      # sequence number                       01
 	yy="${fn:0:4}"     # year                                  2017
 	mm="${fn:4:2}"     # month                                 03
 	dd="${fn:6:2}"     # day                                   20
+	nn=$( [ $n1 -lt 10 ] && echo "0${n1}" || echo "${n1}" )    # at least two digit numbering
 	echo "---------------------"
-	for f in ${file} ${RMT_EDT%/}/${yy}/${yy}-${mm}-${dd}/${bn}* ${RMT_ORG%/}/${yy}/${yy}-${mm}-${dd}/${bn}*; do 
+#	for f in ${file} ${RMT_EDT%/}/${yy}/${yy}-${mm}-${dd}/${bn}* ${RMT_ORG%/}/${yy}/${yy}-${mm}-${dd}/${bn}* ; do 
+	for f in ${file} ${RMT_EDT%/}/${yy}/${yy}-${mm}-${dd}/${bn}* ; do 
 		if [[ -e $f ]]; then
 			#   "${f}"           # full file name with path              /path1/path2/20170320-065042_1.jpg.~3~
 			fn1="${f##*/}"       # full file name                        20170320-065042_1.jpg.~3~
@@ -40,17 +44,4 @@ for file in ${RMT_ERR%/}/*.*; do
 	done
 done
 
-# Rename backup-style filenames, if any
-for f in "${RMT_SRC%/}"/*.~*; do
-	if [[ -e $f ]]; then
-		n=${f%~*}
-		e=${f#*.}
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%%.*}_${n#*~}.${e%.*}"
-	fi
-done
-for f in "${RMT_SRC%/}"/*_[0-9].*; do
-	if [[ -e $f ]]; then
-		mv -n ${DEBUG:+"-v"} "${f}" "${f%_*}_0${f#*_}"
-	fi
-done
-
+photo_align_backup_file_names "${RMT_SRC%/}"
