@@ -66,12 +66,21 @@ exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
     '-FileName<${DateTimeOriginal}-${Model;s/ /_/g;s/__+/-/g}%+2c.${FileTypeExtension}'\
     '-FileName<${CreateDate}-${Model;s/ /_/g;s/__+/-/g}%+2c.${FileTypeExtension}'\
     "${INDIR}"
+
+printInfo "... sorting by time stamps"
 exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
-    -m -r -progress: -q \
-    -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S%%+2c.%%le"\
-    "-FileName<FileModifyDate"\
-    "-FileName<ModifyDate"\
-    "-FileName<DateTimeOriginal"\
-    "-FileName<CreateDate"\
-    "${INDIR}"
-    
+    -if2 '$CreateDate || $DateTimeOriginal || $ModifyDate' -m -r -progress: -q  ${DEBUG:+"-v"} \
+    -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+    '-FileName<${ModifyDate}%+2c.${FileTypeExtension}'\
+    '-FileName<${DateTimeOriginal}%+2c.${FileTypeExtension}'\
+    '-FileName<${CreateDate}%+2c.${FileTypeExtension}'\
+    "${INDIR}" | tee -a ${LOGFILE}
+
+# not ideal but the last resort to get a timestamp
+# (having this in above block did not work for some reason)
+printInfo "... sorting remaining by file times"
+exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+    -fast -m -r -progress: -q  ${DEBUG:+"-v"} \
+    -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+    '-FileName<${FileModifyDate}%+2c.${FileTypeExtension}'\
+    "${INDIR}" | tee -a ${LOGFILE}
