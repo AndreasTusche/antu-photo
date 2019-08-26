@@ -6,8 +6,11 @@
 #   source photo-lib.bash
 #
 # DESCRIPTION
-#	This library defines following simple bash functions:
+#	This library defines following bash functions:
+#	- pause
+#	- photo_align_backup_file_names
 #	- printDebug
+#	- printDebug2
 #	- printError
 #	- printToLog
 #	- printWarn
@@ -23,9 +26,22 @@
 # ---------- ---- --------------------------------------------------------------
 # 2018-12-30 AnTu created
 # 2019-08-02 AnTu export functions to call this file only once
-# 2019-08-23 AnTu moved often used subroutines here
+# 2019-08-23 AnTu moved photo_align_backup_file_names here
+# 2019-08-26 AnTu added pause and printDebug2
 
 (($DEBUG)) && echo "[sourced $( readlink -f "$BASH_SOURCE" )]"
+
+
+
+# Wait for user reaction before continuing, optional time-out in seconds and prompt
+# pause [SECONDS [PROMPT]]
+function pause {
+	echo -e "\033[01;30;103mPress any key to continue ("${1:+"${1}s "}"Ctrl-C to stop)\033[01;05;30;103m:\033[0m"
+	read -n1 -r -s ${1:+"-t $1"} ${2:+"-p $2"}
+	echo
+}
+
+
 
 # NAME
 #	photo_align_backup_file_names
@@ -39,8 +55,9 @@
 #	This is not recursively entering any subdirectory.
 #
 function photo_align_backup_file_names {
+	printDebug "${FUNCNAME}($@)"
+
 	DIR="$1" # expects Directory Path
-	
 	[ ! -d "$DIR" ] && {
 		printError "${FUNCNAME}(): 1st parameter must be a directory\n$DIR is not a directory"
 		exit 1;
@@ -82,11 +99,12 @@ function photo_align_backup_file_names {
 	done
 }
 
-
-
-# coloured error message
+# coloured messages
 function printDebug {
 	(($DEBUG)) && echo -e "\033[01;35mDEBUG:\033[00;35m ${@}\033[0m" >&2
+}
+function printDebug2 {
+	(($DEBUG>1)) && echo -e "\033[01;35mDEBUG:\033[00;35m ${@}\033[0m" >&2
 }
 
 function printError {
@@ -98,7 +116,7 @@ function printInfo {
 }
 
 function printToLog {
-	printDebug ${@}
+	(($DEBUG)) && echo -e "\033[01;35mLOG:  \033[00;35m ${@}\033[0m" >&2
 	date +"%F %X%t${@}" >>${LOGFILE}
 }
 
@@ -108,7 +126,10 @@ function printWarn {
 
 
 # make functions globally available
+export -f pause
+export -f photo_align_backup_file_names
 export -f printDebug
+export -f printDebug2
 export -f printError
 export -f printInfo
 export -f printToLog
