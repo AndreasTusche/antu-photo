@@ -33,7 +33,14 @@ GPS_LOG=gps.gpx #@ToDo: extract date info and have output to yyyymmdd.gpx
 
 
 # --- nothing beyond this line needs configuration -----------------------------
-for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
+	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+fi
+(($ANTU_PHOTO_CFG_DONE)) || echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 && exit 1
+
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+(($PHOTO_LIB_DONE)) || echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2 && exit 1
+
  
 #INDIR="$(  readlink -f "${1:-$(pwd)}" )"
 INDIR="${1:-$(pwd)}"

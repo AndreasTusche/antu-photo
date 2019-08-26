@@ -33,13 +33,22 @@
 # 2018-12-29 AnTu created
 
 # config
-#DEBUG=1
+DEBUG=1
 
 # --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 fi
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
+	exit 1
+fi
+
 (($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2
+	exit 1
+fi
 
 
 INDIR="$(  readlink -f "${1:-$(pwd)}" )"
@@ -73,7 +82,7 @@ for candidate in $(
 			mm="${fn:4:2}"     # month
 			dd="${fn:6:2}"     # day
 			# list files of same basename
-			printDebug "... searching files of date $bn"
+			printDebug2 "... searching files of date $bn"
 			if [[ "${INDIR%/}" != "${TODIR%/}" ]] ; then
 				ls -1 "${TODIR%/}/$yy/$yy-$mm-$dd/$bn"* 2>/dev/null
 			fi
@@ -81,7 +90,7 @@ for candidate in $(
 		done |#
 	sort -u
 ); do
-	printDebug "... ... candidate $candidate"
+	printDebug2 "... ... candidate $candidate"
 	# use checksums to identify duplicates
 	md5 -r "$candidate"
 done |#

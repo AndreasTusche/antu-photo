@@ -82,14 +82,23 @@
 # 2019-08-24 AnTu have two digit counter for backup-type file names
 
 # default config
-#export DEBUG=1
+export DEBUG=1
 export VERBOSE=1
 
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 fi
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
+	exit 1
+fi
+
 (($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2
+	exit 1
+fi
 
 # The 2nd stage moves files to their final local destination
 MYSTAGE=1
@@ -108,13 +117,7 @@ fi
 
 # === MAIN =====================================================================
 
-printError "Before running, clean up source code"
-printError "Align sort logic with `photo-nas-sort`."
-exit
-
-
-
-printToLog "*******************************************************************"
+printToLog '-------------------------------------------------------------------'
 printToLog "${0} started [stage $MYSTAGE]"
 
 cd "${DIR_SRC%/}"
@@ -126,17 +129,18 @@ if [ "$MYSTAGE" == "1" ] ; then
 # --- stage 1 only -------------------------------------------------------------
 
 	photo_align_backup_file_names "${DIR_SRC%/}"
-
+	
 	# move errornous files out of the way
 	printInfo "Check File Types ..."
+	(($DEBUG)) && pause 42
 	find ${MAC:+-E} . -iregex ".*\.($RGX_ERR)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_ERR%/}"/ \;
 	photo_align_backup_file_names "${DIR_ERR%/}"
 
 	# move and rename video clips amd movies
 	printInfo "Movies ..."
+	(($DEBUG)) && pause 42
 	find ${MAC:+-E} . -iregex ".*\.($RGX_MOV)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 	photo_align_backup_file_names "${DIR_TMP%/}"
-
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_MOV%/}" ; fi
 	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_MOV%/}"
@@ -144,9 +148,9 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# then move and rename RAW and archive files
 	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
 	printInfo "RAW ..."
+	(($DEBUG)) && pause 42
 	find -E . -iregex ".*\.($RGX_RAW|$RGX_ARC)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 	photo_align_backup_file_names "${DIR_TMP%/}"
-
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_RAW%/}" ; fi
 	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_RAW%/}"
@@ -154,9 +158,9 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# then move and rename edited files
 	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
 	printInfo "EDIT ..."
+	(($DEBUG)) && pause 42
 	find ${MAC:+-E} . -iregex ".*\.($RGX_EDT)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 	photo_align_backup_file_names "${DIR_TMP%/}"
-
 	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_EDT%/}" ; fi
 	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_EDT%/}"
@@ -169,9 +173,9 @@ fi # [ "$MYSTAGE" == "1" ]
 
 # move and rename all remaining picture files
 printInfo "Pictures ..."
+(($DEBUG)) && pause 42
 find ${MAC:+-E} . -iregex ".*\.($RGX_IMG)" -not -path "${DIR_TMP%/}/*" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
 photo_align_backup_file_names "${DIR_TMP%/}"
-
 if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
 if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_PIC%/}" ; fi
 $CMD_sortphotos "${DIR_TMP%/}" "${DIR_PIC%/}"
@@ -185,6 +189,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 
 	# I. Find original raw files and copy to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find original raw files and copy to RAW"
+	(($DEBUG)) && pause 42
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -247,6 +252,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 
 	# II. Find other original image files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find other original image files and copy to RAW"
+	(($DEBUG)) && pause 42
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -263,7 +269,6 @@ if [ "$MYSTAGE" == "1" ] ; then
 		mm="${fn:4:2}"     # month                                 03
 		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
-		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
@@ -286,8 +291,8 @@ if [ "$MYSTAGE" == "1" ] ; then
 			fi
 		else
 			# 2.   If destination exists and has other filename extension
-			if compgen -G "${ddir%/}/${bn}.*" ; then
-				if test -n "$(find ${MAC:+-E} ${ddir%/} -maxdepth 1 -iregex ".*/${bn}\.(${RGX_RAW})" -print -quit)"; then
+			if compgen -G "${ddir%/}/${b1}.*" ; then
+				if test -n "$(find ${MAC:+-E} ${ddir%/} -maxdepth 1 -iregex ".*/${b1}\.(${RGX_RAW})" -print -quit)"; then
 					# 2.1. destination is RAW, current is not, do nothing (will be found in next step)
 					printToLog "A RAW version of ${fn} exists in ${ddir}. (nothing done)"
 				else
@@ -296,7 +301,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 					mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 				fi
 			else
-				# 3.   If destination does not exist, copy current there
+				# 3.   If destination does not exist, copy current there but keep a copy for the next step
 				printToLog "${file} copied to ${ddir}"
 				mkdir -p "${ddir}"
 				cp "${file}" "${ddir}"
@@ -308,6 +313,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 
 	# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find other image files and move to EDIT"
+	(($DEBUG)) && pause 42
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -324,7 +330,6 @@ if [ "$MYSTAGE" == "1" ] ; then
 		mm="${fn:4:2}"     # month                                 03
 		dd="${fn:6:2}"     # day                                   20
 		ddir="${DIR_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
-		echo "$fn"
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
@@ -356,6 +361,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# V. Find SideCar files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 
 	printInfo "... find SideCar files and move to RAW"
+	(($DEBUG)) && pause 42
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/(${RGX_DAT}|${RGX_DAY})(_[0-9][0-9]?)?.*\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -425,3 +431,4 @@ fi # [ "$MYSTAGE" == "1" ]
 # finally clean up
 rm -f "$DIR_TMP/.DS_Store"
 rm -d "$DIR_TMP"
+printInfo "=== done"

@@ -32,22 +32,32 @@
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-14 AnTu created
-
-# config
-DIR_PIC=~/Pictures/sorted/
-#DEBUG=1
+# 2019-08-25 AnTu code clean-up
 
 # --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
 fi
-(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
- 
-#INDIR="$(  readlink -f "${1:-$(pwd)}" )"
-#OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
-INDIR="${1:-$(pwd)}"
-OUTDIR="${2:-${DIR_PIC}}"
+if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
+	exit 1
+fi
 
+(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
+if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
+	echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2
+	exit 1
+fi
+
+
+INDIR="$(  readlink -f "${1:-$(pwd)}" )"
+OUTDIR="$( readlink -f "${2:-${DIR_PIC}}" )"
+
+printToLog "--- ${0##*/} called"
+printToLog "... INDIR  = $INDIR"
+printToLog "... OUTDIR = $OUTDIR"
+
+printInfo "... sorting by camera model"
 exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
     -if '$Model' -m -r -progress: -q \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
