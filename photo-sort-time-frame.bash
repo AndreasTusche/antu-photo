@@ -63,8 +63,9 @@ printToLog "... INDIR  = $INDIR"
 printToLog "... OUTDIR = $OUTDIR"
 
 # @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp 
-printInfo  "... sorting by time and sequence number (if any)"
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+exiftool \
+	-echo "INFO:  ... sorting by time and sequence number (if any)" \
+	-ext "*" --ext DS_Store --ext localized -i SYMLINKS \
 	-if '$SequenceNumber' -if '$SequenceNumber ne "Single"' -if '$SequenceNumber ne 0' \
 	-m -r -progress: -q ${DEBUG:+"-v"} \
 	-d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
@@ -72,32 +73,72 @@ exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
 	'-FileName<${ModifyDate}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
 	'-FileName<${DateTimeOriginal}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
 	'-FileName<${CreateDate}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
-	"${INDIR}" | tee -a ${LOGFILE} | grep -v "(failed condition)"
-	
-printInfo "... sorting by time and frame (if any)"
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+	"${INDIR}" \
+	-execute \
+	-echo "INFO:  ... sorting by time and frame (if any)" \
+	-ext "*" --ext DS_Store --ext localized -i SYMLINKS \
     -if '$FrameNumber' -m -r -progress: -q  ${DEBUG:+"-v"} \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
     '-FileName<${FileModifyDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
     '-FileName<${ModifyDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
     '-FileName<${DateTimeOriginal}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
     '-FileName<${CreateDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
-    "${INDIR}" | tee -a ${LOGFILE} | grep -v "(failed condition)"
-
-printInfo "... sorting by time stamps"
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+    "${INDIR}" \
+	-execute \
+	-echo "INFO:  ... sorting by time stamps" \
+	-ext "*" --ext DS_Store --ext localized -i SYMLINKS \
     -if2 '$CreateDate || $DateTimeOriginal || $ModifyDate' -m -r -progress: -q  ${DEBUG:+"-v"} \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
     '-FileName<${ModifyDate}%+2c.${FileTypeExtension}'\
     '-FileName<${DateTimeOriginal}%+2c.${FileTypeExtension}'\
     '-FileName<${CreateDate}%+2c.${FileTypeExtension}'\
-    "${INDIR}" | tee -a ${LOGFILE}
-
-# not ideal but the last resort to get a timestamp
-# (having this in above block did not work for some reason)
-printInfo "... sorting remaining by file times"
-exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+    "${INDIR}" \
+	-execute \
+	-echo "INFO:  ... sorting remaining by file times" \
+	-ext "*" --ext DS_Store --ext localized -i SYMLINKS \
     -fast -m -r -progress: -q  ${DEBUG:+"-v"} \
     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
     '-FileName<${FileModifyDate}%+2c.${FileTypeExtension}'\
-    "${INDIR}" | tee -a ${LOGFILE}
+    "${INDIR}" \
+	-execute | tee -a ${LOGFILE} | grep -v "(failed condition)"
+	
+	
+# # @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp 
+# printInfo  "... sorting by time and sequence number (if any)"
+# exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+# 	-if '$SequenceNumber' -if '$SequenceNumber ne "Single"' -if '$SequenceNumber ne 0' \
+# 	-m -r -progress: -q ${DEBUG:+"-v"} \
+# 	-d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+# 	'-FileName<${FileModifyDate}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+# 	'-FileName<${ModifyDate}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+# 	'-FileName<${DateTimeOriginal}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+# 	'-FileName<${CreateDate}_${SequenceNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+# 	"${INDIR}" | tee -a ${LOGFILE} | grep -v "(failed condition)"
+# 
+# printInfo "... sorting by time and frame (if any)"
+# exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+#     -if '$FrameNumber' -m -r -progress: -q  ${DEBUG:+"-v"} \
+#     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+#     '-FileName<${FileModifyDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+#     '-FileName<${ModifyDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+#     '-FileName<${DateTimeOriginal}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+#     '-FileName<${CreateDate}_${FrameNumber;s/\b(\d)\b/0$1/g}%+2c.${FileTypeExtension}'\
+#     "${INDIR}" | tee -a ${LOGFILE} | grep -v "(failed condition)"
+# 
+# printInfo "... sorting by time stamps"
+# exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+#     -if2 '$CreateDate || $DateTimeOriginal || $ModifyDate' -m -r -progress: -q  ${DEBUG:+"-v"} \
+#     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+#     '-FileName<${ModifyDate}%+2c.${FileTypeExtension}'\
+#     '-FileName<${DateTimeOriginal}%+2c.${FileTypeExtension}'\
+#     '-FileName<${CreateDate}%+2c.${FileTypeExtension}'\
+#     "${INDIR}" | tee -a ${LOGFILE}
+# 
+# # not ideal but the last resort to get a timestamp
+# # (having this in above block did not work for some reason)
+# printInfo "... sorting remaining by file times"
+# exiftool -ext "*" --ext DS_Store --ext localized -i SYMLINKS \
+#     -fast -m -r -progress: -q  ${DEBUG:+"-v"} \
+#     -d "${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"\
+#     '-FileName<${FileModifyDate}%+2c.${FileTypeExtension}'\
+#     "${INDIR}" | tee -a ${LOGFILE}
