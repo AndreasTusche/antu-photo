@@ -82,12 +82,15 @@
 # 2019-08-24 AnTu have two digit counter for backup-type file names
 
 # default config
-export DEBUG=1
+export DEBUG=0
 export VERBOSE=1
 
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
-	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
+	for d in "${0%/*}" ~ . ; do
+		source "$d/.antu-photo.cfg" 2>/dev/null || \
+		source "$d/antu-photo.cfg"  2>/dev/null
+	done
 fi
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
 	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
