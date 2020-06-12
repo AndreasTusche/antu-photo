@@ -13,7 +13,7 @@ Problems may occur when I later (re-)discover files that are almost identical to
 ## Requirements
 
 The workflow is modelled mainly to support these two main requirements:
-* Archiving - Put th	e files in a safe place and never touch again.
+* Archiving - Put the files in a safe place and never touch again.
 * Browsing  - Have all images in a catalogue with metadata.
 
 'Editing' is not part of the workflow because the working files and results are just a different kind of input to the workflow again.
@@ -301,6 +301,8 @@ Unwanted stuff are image-catalogues, application directories or third party libr
 
     .app .dmg .icbu .imovielibrary .keynote .oo3 .mpkg .numbers
     .pages .photoslibrary .pkg .theater .webarchive
+	
+In above list, the `.imovielibrary` and `.photoslibrary` actually are directories created by the macOS iMovie or Photo Applications respectively. The problem with those is, that they contain the original videos or photos but also a lot of smaller, cropped or edited variants or thumbnails. If you want to extract the originals from there, then just place the `.imovielibrary/*/Original Media/` or `.photoslibrary/Masters/` directories in the INBOX (`~/Pictures/INBOX/`).
 
 Movies are recognised by their file extension:
 
@@ -417,7 +419,6 @@ Obviously time stamps should be correct before files are renamed and sorted. The
 | Use the ExifTool to extract, correct time-spans or to modify meta-information. |
 | Use the ExifTool to sort files in places for review. |
 
-```
 
 ### Review images
 
@@ -472,7 +473,7 @@ This script moves files in this order
 Filetypes are recognised by their file extensions.
 Images and RAW images are renamed to `YYYYMMDD-hhmmss.xxx`, duplicates are not kept but if two files were taken at the same second, the filename will be suffixed with a an incremental number: `YYYYMMDD-hhmmss_n.xxx`.
 
-``` shell
+```shell
 #!/bin/bash
 DIR_ANTU_PHOTO="${0%/*}"
 CMD_correcttim="${DIR_ANTU_PHOTO}/photo-fix-times.bash"
@@ -518,19 +519,25 @@ The complete script: [antu-sortphotos.bash]()
 
 
 
-### photo-extract-gps
+### The scripts
+
+
+
+#### photo-extract-gps
 
 This extracts GPS geo-location information from files in the given directory and subfolders and writes the result in GPX format to stdout.
 
-    photo-extract-gps.bash DIRNAME
+```sh
+photo-extract-gps.bash DIRNAME
+```
 
 
 
-### photo-fix-times
+#### photo-fix-times
 
 Uses ExifTool to identify the following timestamps. It is expected that they are identical or increasing in this order. If this is not the case, the timestamps are set to the found minimum.
 
-```
+```shell
 CreateDate
     ≤ DateTimeOriginal
     ≤ ModifyDate
@@ -548,12 +555,11 @@ If a GPS timestamp exists, it is trusted and the CreateDate and DateTimeOriginal
     brew install gawk
 
 
-### photo-import-sd
+#### photo-import-sd
 
 The mount point of SD Cards is different for each card. This scripts tries to find it and then copies all Photos from the `DCIM` to the Inbox directory. By the way, it does not keep track of past copy activities and hence this script may produce a lot of duplicate files on your disk, if you don't take care.
 
-
-``` shell
+```shell
 #!/bin/bash
 
 DIR_DCF=''                             # mount point of SD Card
@@ -579,7 +585,7 @@ if [[ "$DIR_DCF" == "" ]]; then
 		echo "No SD Card found"
 		exit 1
 	fi
-
+	
 	# get mount point of SD Card
 	DIR_DCF=$( diskutil info ${sdCard}s1 | awk -F: '/Mount Point/{gsub(/^[ \t]+/, "", $2); print $2}' )
 fi
@@ -592,13 +598,13 @@ rsync -rtv --partial-dir=$DIR_ERR . $DIR_SRC
 The complete script: [photo-import-sd.bash]()
 
 
-### photo-restore-original
+#### photo-restore-original
 
 This automates the maintenance of the "\_original" files created by exiftool. It has no effect on files without an "\_original" copy. This restores the files from their original copies by renaming the "\_original" files to replace the edited versions in a directory and all its subdirectories.
 
     photo-restore-original.bash DIRECORY
 
-### photo-set-gps
+#### photo-set-gps
 
 This extracts GPS geo-location information from files in the given directory and subfolders and stores it in an GPX file, unless it is already available in the same folder.
 
@@ -606,7 +612,7 @@ In a second step it sets(!) the GPS geo-location information for the other files
 
     photo-set-gps.bash DIRNAME
 
-### photo-set-times
+#### photo-set-times
 
 This sets the date and time stamps to the given date for one picture file or for all picture files in the given directory (not recursive).
 
@@ -624,7 +630,7 @@ Following timestamps are modified if they existed before:
     photo-set-times.bash YYYY:MM:DD hh:mm:ss [DIRNAME]
 
 
-### photo-shift-times
+#### photo-shift-times
 
 This shifts the date and time stamps by the given number of seconds for one picture file or for all pictures in the given directory (not recursive).
 
@@ -643,7 +649,7 @@ Following tmestamps are modified if they existed before:
 It is recommended to then move and rename the modified files using `photo-sort-time`.
 
 
-### photo-sort-time-frame
+#### photo-sort-time-frame
 
 This moves files from present directory and subfolders to `~/Pictures/REVIEW/YYYY/YYYY-MM-DD/`.
 
@@ -651,7 +657,7 @@ Images and RAW images are renamed to `YYYYMMDD-hhmmss_ffff.xxx`, based on their 
 
     photo-sort-time-frame.bash [INDIR [OUTDIR]]
 
-### photo-sort-time-model
+#### photo-sort-time-model
 
 This moves files from present directory and subfolders to `~/Pictures/REVIEW/YYYY/YYYY-MM-DD/`.
 
@@ -659,7 +665,7 @@ Images and RAW images are renamed `YYYYMMDD-hhmmss-model.xxx`, based on their Cr
 
     photo-sort-time-model.bash [INDIR [OUTDIR]]
 
-### photo-sort-time
+#### photo-sort-time
 
 This moves files from `~/Pictures/INBOX/` and subfolders to `~/Pictures/REVIEW/YYYY/YYYY-MM-DD/`
 
@@ -667,30 +673,29 @@ Images and RAW images are renamed to `YYYYMMDD-hhmmss.xxx`, based on their Creat
 
     photo-sort-time.bash [INDIR [OUTDIR]]
 
-### photo-sort-time-frame
+#### photo-sort-time-frame
 
 Like above [photo-sort-time.bash][#photo-sort-time] script.
 
-### photo-trash
+#### photo-trash
 
-A brain-dead script to find corresponding RAW files to already trashed JPG files.
+A brain-dead script to find corresponding RAW files to already trashed JPG files and vice versa.
 
-``` shell
-    #!/bin/bash
+```shell
+#!/bin/bash
 
-    DIR_RAW=~/Pictures/ORIGINAL/
-    RGX_DAT="[12][09][0-9][0-9][01][0-9][0-3][0-9]-[012][0-9][0-5][0-9][0-6][0-9]"
+DIR_RAW=~/Pictures/ORIGINAL/
+RGX_DAT="[12][09][0-9][0-9][01][0-9][0-3][0-9]-[012][0-9][0-5][0-9][0-6][0-9]"
 
-    cd ~/.Trash
-    for f in ${RGX_DAT}.jpg ${RGX_DAT}_[1-9].jpg; do
-        mv $DIR_RAW/${f:0:4}/${f:0:4}-${f:4:2}-${f:6:2}/${f%.*}.* .
-    done
+cd ~/.Trash
+for f in ${RGX_DAT}.jpg ${RGX_DAT}_[1-9].jpg; do
+mv $DIR_RAW/${f:0:4}/${f:0:4}-${f:4:2}-${f:6:2}/${f%.*}.* .
+done
 ```
 
-The complete script: [photo-trash.bash]()
+The complete script also checks Trashes of external drives or USB sticks: [photo-trash.bash]()
 
-<!--
-### merge-gpx
+#### merge-gpx
 
 Brain-dead merge of GPX files. Removing all headers and trailers. Output goes to stdout.
 
@@ -699,51 +704,50 @@ Brain-dead merge of GPX files. Removing all headers and trailers. Output goes to
 
 
 
-### photo-check-times.bash
+#### photo-check-times.bash
 
 identify photos with illogical time stamps
 
 
-### photo-correct-times.bash
+#### photo-correct-times.bash
 
 create a list of commands to correct date and time stamps
 
 
-### photo-explain-times.bash
+#### photo-explain-times.bash
 
 explain output of photo-check-times.bash
 
 
-### photo-extract-gps.bash
+#### photo-extract-gps.bash
 
 This extracts GPS geo-location information from files in the given directory and subfolders. The data is written in GPX format to stdout.
 
-### photo-restore-original.bash
+#### photo-restore-original.bash
 
 restore from `_original` files as by ExifTool
 
 
-### photo-set-times.bash
+#### photo-set-times.bash
 
 set date and time to a fixed date
 
 
-### photo-shift-times.bash
+#### photo-shift-times.bash
 
 shift date and time by a fixed number of seconds
 
 
-### photo-sort-time-model.bash
+#### photo-sort-time-model.bash
 
 recursively rename and sort photos by creation date and camera model
 
-### photo-sort-time.bash
+#### photo-sort-time.bash
 
 recursively rename and sort photos by creation date
- -->
 
 
-## configuration
+### configuration
 
 The directories and other parameters can be configured using configuration files. All found configuration files will be read and values set in earlier files are overwritten by values found in later files; in this order:
 
