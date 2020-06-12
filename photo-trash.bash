@@ -23,6 +23,7 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-15 AnTu created
 # 2018-10-03 AnTu trash both, image and RAW
+# 2019-10-22 AnTu check external drives Trashes
 
 # config
 #DEBUG=1
@@ -43,25 +44,29 @@ if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
 fi
 
 
+for rcyDir in ${DIR_RCY} /Volumes/*/.Trashes/* ; do
 
-cd ${DIR_RCY}
+	cd ${rcyDir}
 
-# for each RAW trash the corresponding image
-find ${MAC:+-E} . -iregex ".*/${RGX_DAT%/}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name 
-	yy="${fn:0:4}"     # year 
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
-    mv -v ${DIR_PIC%/}/$yy/$yy-$mm-$dd/$bn.* . 2>/dev/null
-done
+	# for each RAW trash the corresponding image
+	find ${MAC:+-E} . -iregex ".*/${RGX_DAT%/}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		fn="${file##*/}"   # full file name
+		bn="${fn%.*}"      # file base name 
+		yy="${fn:0:4}"     # year 
+		mm="${fn:4:2}"     # month
+		dd="${fn:6:2}"     # day
+	    mv -v ${DIR_PIC_2%/}/$yy/$yy-$mm-$dd/$bn.* ${DIR_RCY}/ 2>/dev/null
+	    mv -v ${DIR_SRC_2%/}/$yy/$yy-$mm-$dd/$bn.* ${DIR_RCY}/ 2>/dev/null
+	done
 
-# for each image trash the corresponding RAW
-find ${MAC:+-E} . -iregex ".*/${RGX_DAT%/}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-	fn="${file##*/}"   # full file name
-	bn="${fn%.*}"      # file base name 
-	yy="${fn:0:4}"     # year 
-	mm="${fn:4:2}"     # month
-	dd="${fn:6:2}"     # day
-    mv -v ${DIR_RAW%/}/$yy/$yy-$mm-$dd/$bn.* . 2>/dev/null
+	# for each image trash the corresponding RAW
+	find ${MAC:+-E} . -iregex ".*/${RGX_DAT%/}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		fn="${file##*/}"   # full file name
+		bn="${fn%.*}"      # file base name 
+		yy="${fn:0:4}"     # year 
+		mm="${fn:4:2}"     # month
+		dd="${fn:6:2}"     # day
+	    mv -v ${DIR_RAW%/}/$yy/$yy-$mm-$dd/$bn.* ${DIR_RCY}/ 2>/dev/null
+	done
+
 done
