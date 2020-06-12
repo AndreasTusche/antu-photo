@@ -1,9 +1,9 @@
 #
 # NAME
-#   photo-lib.bash - Library of common functions for bash scripts
+#   lib_photo.bash - Library of common functions for bash scripts
 #
 # SYNOPSIS
-#   source photo-lib.bash
+#   source lib_photo.bash
 #
 # DESCRIPTION
 #	This library defines following bash functions:
