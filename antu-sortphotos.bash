@@ -1,5 +1,6 @@
-#!/bin/bash
-#
+#!/usr/bin/env bash
+# -*- mode: bash; tab-width: 4 -*-
+################################################################################
 # NAME
 #	antu-sortphotos.bash - move photos and videos to daily folders
 #
@@ -8,16 +9,16 @@
 #
 # DESCRIPTION
 #	A quick wrapper around the 'exiftool' tool for my preferred directory
-#	strucure. It moves
-#	* movies        from     ~/Pictures/INBOX/ and subfolders
+#	strucure. Everything starts with the INBOX. It moves, in this order:
+#	- movies        from     ~/Pictures/INBOX/ and subfolders
 #	                to       ~/Movies/YYYY/YYYY-MM-DD/
-#	* movies        from     ~/Movies/
+#	- movies        from     ~/Movies/
 #	                to       ~/Movies/YYYY/YYYY-MM-DD/
-#	* raw images    from     ~/Pictures/INBOX/ and subfolders
+#	- raw images    from     ~/Pictures/INBOX/ and subfolders
 #	                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
-#	* edited images from     ~/Pictures/INBOX/ and subfolders
+#	- edited images from     ~/Pictures/INBOX/ and subfolders
 #	                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
-#	* photos        from     ~/Pictures/INBOX/ and subfolders
+#	- photos        from     ~/Pictures/INBOX/ and subfolders
 #	                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
 #
 #	Above default direcory names may be overwritten by the antu-photo.cfg file.
@@ -54,7 +55,7 @@
 #	be suffixed with an incremental sequence number: YYYYMMDD-hhmmss_nn.xxx .
 #
 #	In a second invocation, with option '--stage2', pictures will be resorted
-#	* photos        from     ~/Pictures/sorted/ and subfolders
+#	- photos        from     ~/Pictures/sorted/ and subfolders
 #	                to       ~/Pictures/YYYY/YYYY-MM-DD/
 #
 # FILES
@@ -67,7 +68,7 @@
 #
 # AUTHOR
 #	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
-#	@copyright  (c) 2017-2019, Andreas Tusche <www.andreas-tusche.de>
+#	@copyright  (c) 2017-2021, Andreas Tusche <www.andreas-tusche.de>
 #	@package    antu-photo
 #	@version    $Revision: 0.0 $
 #	@(#) $Id: . Exp $
@@ -81,118 +82,177 @@
 # 2019-08-02 AnTu check for pictures (JPG, etc.) wich are the only originals
 # 2019-08-24 AnTu have two digit counter for backup-type file names
 
-# default config
-export DEBUG=0
-export VERBOSE=1
+################################################################################
+# config
+################################################################################
 
-# --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
-	for d in "${0%/*}" ~ . ; do
-		source "$d/.antu-photo.cfg" 2>/dev/null || \
-		source "$d/antu-photo.cfg"  2>/dev/null
-	done
-fi
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
-	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
-	exit 1
-fi
+#-------------------------------------------------------------------------------
+# Global shell behaviour
+#-------------------------------------------------------------------------------
 
-(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
-if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
-	echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2
-	exit 1
-fi
+DEBUG=${DEBUG-''}						# 0: do not 1: do print debug messages
+                                        # 2: bash verbose, 3: bash xtrace
+										# 9: bash noexec
 
-# The 2nd stage moves files to their final local destination
-MYSTAGE=1
-if [[ "$1" == "-2" || "$1" == "--stage2" ]] ; then
-	MYSTAGE=2
-	DIR_SRC=$DIR_SRC_2
-	DIR_PIC=$DIR_PIC_2
-fi
+set -o nounset                          # Used variables MUST be initialized.
+set -o errtrace                         # Traces error in function & co.
+set -o functrace                        # Traps inherited by functions
+set -o pipefail                         # Exit on errors in pipe
+set +o posix                            # disable POSIX
 
-# Have local logfile, if NAS was not mounted
-if [[ ! -e "$NAS_SRC" ]]; then
-	LOGFILE="${DIR_PIC_2%/}/.antu-photo.log"
-fi
+((DEBUG==0)) && DEBUG=
+((DEBUG>1)) && set -o verbose; ((DEBUG<2)) && set +o verbose
+((DEBUG>2)) && set -o xtrace;  ((DEBUG<3)) && set +o xtrace
+((DEBUG>8)) && set -o noexec;  ((DEBUG<9)) && set +o noexec
+
+((DEBUG)) && VERBOSE=1 || VERBOSE=${VERBOSE:-$DEBUG}
+((DEBUG)) && clear && banner -w 32 $(date +%T)
+
+# preliminary functions, may be replaced by those from lib_common.bash
+die()        { err=${1-1}; shift; [ -z ${1+x} ] || printError "OLD $@"; exit $err ; }
+printDebug() { ((DEBUG)) && echo -e "$(date +'%F %T') \033[1;35mDEBUG  :\033[0;35m ${@}\033[0m" ; }
+printError() {              echo -e "$(date +'%F %T') \033[1;91mERROR  :\033[0;91m ${@}\033[0m" ; }
+if ! command -v realpath &>/dev/null ; then realpath() { readlink -- "$1" ; } ; fi
+
+#-------------------------------------------------------------------------------
+# path to this script - needs GNU `realpath` installed
+#-------------------------------------------------------------------------------
+
+#@Todo: Use source lib_coreutils.bash only during development
+#@Todo: else photo_check_dependencies() adds coreutils to the PATH
+source "$( dirname $( realpath "${BASH_SOURCE[0]}" ) )/lib_coreutils.bash" || die 53 "Library lib_coreutils.bash was not found."
+
+readonly _THIS_SCRIPT="$( realpath "${BASH_SOURCE[0]}" )"
+readonly _THIS=$( basename "$_THIS_SCRIPT" )
+readonly _THIS_DIR="$( dirname $_THIS_SCRIPT )"
+
+printDebug "_THIS_SCRIPT  = $_THIS_SCRIPT"
+printDebug "_THIS         = $_THIS"
+printDebug "_THIS_DIR     = $_THIS_DIR"
 
 
 
-# === MAIN =====================================================================
+#-------------------------------------------------------------------------------
+# load some function libraries
+#-------------------------------------------------------------------------------
+
+source "$_THIS_DIR/lib_common.bash" && ((common_lib_loaded)) || die 53 "Library lib_common.bash was not found."
+source "$_THIS_DIR/lib_exif.bash"   && ((exif_lib_loaded))   || die 53 "Library lib_exif.bash was not found."
+source "$_THIS_DIR/lib_photo.bash"  && ((photo_lib_loaded))  || die 53 "Library lib_photo.bash was not found."
+
+
+
+#-------------------------------------------------------------------------------
+# load config file(s), last one found overwrites all the previous ones
+#-------------------------------------------------------------------------------
+
+for d in "$_THIS_DIR" ~/.config/antu-photo ~ . ; do
+	source "$d/.antu-photo.cfg" 2>/dev/null || \
+	source "$d/antu-photo.cfg"  2>/dev/null
+done
+((ANTU_PHOTO_CFG_LOADED)) || die 51 "No config file antu-photo.cfg found"
+
+photo_config_commands
+photo_config_directories_wrk
+photo_config_directories_nas
+photo_config_directories_rmt
+
+
+
+#-------------------------------------------------------------------------------
+# check directories
+#-------------------------------------------------------------------------------
+
+# If NAS was not mounted, then use a local logfile
+photo_NASisMounted || LOGFILE="${DIR_PIC%/}/.antu-photo.log"
+
+photo_check_dependencies #ToDo: also sets PATH to GNU coreutils
+photo_check_directories
+photo_check_files
+
+((ROTATE_LOGFILE)) && rotateLog $LOGFILE $ROTATE_LOGFILE
+
+
+
+################################################################################
+# MAIN
+################################################################################
+
 
 printToLog '-------------------------------------------------------------------'
-printToLog "${0} started [stage $MYSTAGE]"
+printToLog "$_THIS started by ${USER:-${USERNAME:-${LOGNAME}}}"
 
-cd "${DIR_SRC%/}"
+((CREATE_MISSING_DIRECTORIES)) && photo_create_directories
 
-mkdir -p "$DIR_TMP"
-mkdir -p "$DIR_ERR"
+# --- stage 1 ------------------------------------------------------------------
+# sort files from INBOX to REVIEW
 
-if [ "$MYSTAGE" == "1" ] ; then
-# --- stage 1 only -------------------------------------------------------------
+if [[ -d "$DIR_SRC" ]] ; then
+	cd $( realpath "$DIR_SRC" )
+	printToLog "Work directory (in-box): $DIR_SRC"
+else
+	die $ERR_DIR_NOT_FOUND "cd $DIR_SRC: No such file or directory."
+fi
 
-	photo_align_backup_file_names "${DIR_SRC%/}"
-	
-	# move errornous files out of the way
-	printInfo "Check File Types ..."
-	(($DEBUG)) && pause 42
-	find ${MAC:+-E} . -iregex ".*\.($RGX_ERR)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_ERR%/}"/ \;
-	photo_align_backup_file_names "${DIR_ERR%/}"
+# --- move away unwanted files
 
-	# move and rename video clips amd movies
-	printInfo "Movies ..."
-	(($DEBUG)) && pause 42
-	find ${MAC:+-E} . -iregex ".*\.($RGX_MOV)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-	photo_align_backup_file_names "${DIR_TMP%/}"
-	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
-	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_MOV%/}" ; fi
-	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_MOV%/}"
-
-	# then move and rename RAW and archive files
-	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
-	printInfo "RAW ..."
-	(($DEBUG)) && pause 42
-	find -E . -iregex ".*\.($RGX_RAW|$RGX_ARC)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-	photo_align_backup_file_names "${DIR_TMP%/}"
-	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
-	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_RAW%/}" ; fi
-	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_RAW%/}"
-
-	# then move and rename edited files
-	# @ToDo: Sidecar files .cos .dop .nks .pp3 .?s.spd .xmp
-	printInfo "EDIT ..."
-	(($DEBUG)) && pause 42
-	find ${MAC:+-E} . -iregex ".*\.($RGX_EDT)" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-	photo_align_backup_file_names "${DIR_TMP%/}"
-	if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
-	if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_EDT%/}" ; fi
-	$CMD_sortphotos "${DIR_TMP%/}" "${DIR_EDT%/}"
-	
-fi # [ "$MYSTAGE" == "1" ]
+printVerbose "Next step is to trash duplicates and move unwanted files."
+(($DEBUG)) && pause - "Trash duplicates and move unwanted files"
+photo_trash_duplicates .
+photo_align_backup_file_names
+photo_move . "$DIR_ERR" "$RGX_ERR"          "Find Error" || die $ERR_NOT_WRITEABLE "Solve above problems before trying again."
+photo_move . "$DIR_ERR" "$RGX_BAD"          "Move Unwanted" # move unwanted files out of the way
+photo_trash_duplicates "$DIR_ERR"
 
 
+# --- heavy lifting START ---
+#! ToDo: photo_sort() currently only works with '.' as INDIR
+photo_sort . "$MOV_REV" "$RGX_MOV"          "Sort Movies"   # move and rename video clips amd movies
+photo_sort . "$DIR_RAW" "$RGX_RAW|$RGX_ARC" "Sort RAW"      # move and rename RAW and archive files
+photo_sort . "$DIR_EDT" "$RGX_EDT"          "Sort EDIT"     # move and rename edited files
+photo_sort . "$DIR_REV" "$RGX_IMG"          "Sort Images"   # move and rename all remaining image files
 
-# --- stage 1 and 2 ------------------------------------------------------------
+# --- heavy lifting END ---
 
-# move and rename all remaining picture files
-printInfo "Pictures ..."
-(($DEBUG)) && pause 42
-find ${MAC:+-E} . -iregex ".*\.($RGX_IMG)" -not -path "${DIR_TMP%/}/*" -exec mv --backup=numbered -f ${DEBUG:+"-v"} "{}" "${DIR_TMP%/}"/ \;
-photo_align_backup_file_names "${DIR_TMP%/}"
-if [[ $CORRECTTIM == 1 ]] ; then $CMD_correcttim "${DIR_TMP%/}" ; fi
-if [[ $TRASHDUPES == 1 ]] ; then $CMD_trashdupes "${DIR_TMP%/}" "${DIR_PIC%/}" ; fi
-$CMD_sortphotos "${DIR_TMP%/}" "${DIR_PIC%/}"
+# per destination directory, check for duplicates
+printVerbose "Next step is to remove duplicates from target directories."
+(($DEBUG)) && pause - "Remove duplicates from target directories"
+
+pushd "$DIR_RAW" >/dev/null
+for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
+	[ -d "$d" ] || break
+	photo_trash_duplicates "${DIR_ORG%/}/$d" "${DIR_RAW%/}/$d"
+done
+
+pushd "$DIR_REV" >/dev/null
+for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
+	[ -d "$d" ] || break
+	photo_trash_duplicates "${DIR_PIC%/}/$d" "${DIR_REV%/}/$d"
+done
+
+popd >/dev/null
+popd >/dev/null
+
+
+printInfo "Done - remaining files in $DIR_SRC"
+find $( realpath "$DIR_SRC" ) -type f ! -name .DS_Store
+
+# @Todo: in stage 2 use DIR_ORG instead of DIR_RAW 
+# @Todo: in stage 2 use DIR_PIC instead of DIR_REV
+
+#!## DEVELOP - CONTINUE HERE ####
+exit                         ####
+#!## DEVELOP - CONTINUE HERE ####
 
 
 
-if [ "$MYSTAGE" == "1" ] ; then
 # --- stage 1 only -------------------------------------------------------------
 
 	printInfo "searching for pictures which are actually also originals ..."
 
 	# I. Find original raw files and copy to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find original raw files and copy to RAW"
-	(($DEBUG)) && pause 42
+	(($DEBUG)) && pause
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -255,7 +315,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 
 	# II. Find other original image files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find other original image files and copy to RAW"
-	(($DEBUG)) && pause 42
+	(($DEBUG)) && pause
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -316,7 +376,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 
 	# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 	printInfo "... find other image files and move to EDIT"
-	(($DEBUG)) && pause 42
+	(($DEBUG)) && pause
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -364,7 +424,7 @@ if [ "$MYSTAGE" == "1" ] ; then
 	# V. Find SideCar files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 
 	printInfo "... find SideCar files and move to RAW"
-	(($DEBUG)) && pause 42
+	(($DEBUG)) && pause
 
 	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/(${RGX_DAT}|${RGX_DAY})(_[0-9][0-9]?)?.*\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
@@ -406,8 +466,6 @@ if [ "$MYSTAGE" == "1" ] ; then
 			mv "${file}" "${ddir}"
 		fi
 	done
-
-fi # [ "$MYSTAGE" == "1" ]
 
 
 
