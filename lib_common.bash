@@ -271,12 +271,12 @@ function debugFunctionCalls() {
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
-#====================================================================V.201207===
-# ToDo: check if ERRORCODE is a number
+#====================================================================V.210513===
 
 function die() { # [ERRORCODE [MESSAGE]]
 	printDebug "${FUNCNAME}( $@ )"
-	local err=${1-1}; shift
+	local err=${1-1}; 
+	isNumber "$err" && shift || err=1
 	[ -z ${1+x} ] || printError "$@"
 	exit $err
 }
@@ -555,13 +555,13 @@ function logWarning { _common_log "WARNING: ${@}"; }
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
-#====================================================================V.201126===
+#====================================================================V.210514===
 # ToDo: exit on letters 'q'(quit) 'n'(no) 'x'(exit)
 
 function pause() { # [SECONDS [PROMPT]] 
 	printDebug "${FUNCNAME}( $@ )"
 
-	if [[ "$1" == "-" ]]; then
+	if [[ "${1:--}" == "-" ]]; then
 		local _timeout=${TMOUT:-42}
 	else
 		local _timeout=${1:-${TMOUT:-42}} 
