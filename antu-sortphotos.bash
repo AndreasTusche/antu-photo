@@ -15,11 +15,11 @@
 #	- movies        from     ~/Movies/
 #	                to       ~/Movies/YYYY/YYYY-MM-DD/
 #	- raw images    from     ~/Pictures/INBOX/ and subfolders
-#	                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
+#?	                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
 #	- edited images from     ~/Pictures/INBOX/ and subfolders
 #	                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
 #	- photos        from     ~/Pictures/INBOX/ and subfolders
-#	                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
+#?	                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
 #
 #	Above default direcory names may be overwritten by the antu-photo.cfg file.
 #
@@ -44,27 +44,27 @@
 #	Derived or edited images are recognised by their file extension:
 #		.afphoto .bmp .eps .pdf .psd .tif .tiff
 #
-#	All files are checked, if their EXIF timestamps had been corrupted, and are
-#	fixed, if necessary. It is expected that all timestamps are either identical
-#	or increasing in this order:
-# 		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
-#		≤ FileInodeChangeDate ≤ FileAccessDate
+#?	All files are checked, if their EXIF timestamps had been corrupted, and are
+#?	fixed, if necessary. It is expected that all timestamps are either identical
+#?	or increasing in this order:
+#?		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
+#?		≤ FileInodeChangeDate ≤ FileAccessDate
 #
 #	Images and RAW images are renamed to YYYYMMDD-hhmmss.xxx, based on their
 #	CreateDate. If two pictures were taken at the same second, the filename will
 #	be suffixed with an incremental sequence number: YYYYMMDD-hhmmss_nn.xxx .
 #
-#	In a second invocation, with option '--stage2', pictures will be resorted
-#	- photos        from     ~/Pictures/sorted/ and subfolders
-#	                to       ~/Pictures/YYYY/YYYY-MM-DD/
+#?	In a second invocation, with option '--stage2', pictures will be resorted
+#?	- photos        from     ~/Pictures/sorted/ and subfolders
+#?	                to       ~/Pictures/YYYY/YYYY-MM-DD/
 #
 # FILES
 #	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
 # BUGS
 #	- The exiftool may bail out on non-ascii characters in the filename.
-#	- Companion files from 3rd party software (sidecar files) are not renamed
-#	  and may loose their intended function.
+#?	- Companion files from 3rd party software (sidecar files) are not renamed
+#?	  and may loose their intended function.
 #
 # AUTHOR
 #	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
@@ -85,6 +85,10 @@
 ################################################################################
 # config
 ################################################################################
+
+# ToDo: correctly handle stages
+STAGE_ONE=1
+STAGE_TWO=0
 
 #-------------------------------------------------------------------------------
 # Global shell behaviour
@@ -114,6 +118,8 @@ printDebug() { ((DEBUG)) && echo -e "$(date +'%F %T') \033[1;35mDEBUG  :\033[0;3
 printError() {              echo -e "$(date +'%F %T') \033[1;91mERROR  :\033[0;91m ${@}\033[0m" ; }
 if ! command -v realpath &>/dev/null ; then realpath() { readlink -- "$1" ; } ; fi
 
+
+
 #-------------------------------------------------------------------------------
 # path to this script - needs GNU `realpath` installed
 #-------------------------------------------------------------------------------
@@ -122,9 +128,9 @@ if ! command -v realpath &>/dev/null ; then realpath() { readlink -- "$1" ; } ; 
 #@Todo: else photo_check_dependencies() adds coreutils to the PATH
 source "$( dirname $( realpath "${BASH_SOURCE[0]}" ) )/lib_coreutils.bash" || die 53 "Library lib_coreutils.bash was not found."
 
-readonly _THIS_SCRIPT="$( realpath "${BASH_SOURCE[0]}" )"
-readonly _THIS=$( basename "$_THIS_SCRIPT" )
-readonly _THIS_DIR="$( dirname $_THIS_SCRIPT )"
+readonly _THIS_SCRIPT="$( realpath "${BASH_SOURCE[0]}" )" # full path to script
+readonly _THIS=$( basename "$_THIS_SCRIPT" )              # script name
+readonly _THIS_DIR="$( dirname $_THIS_SCRIPT )"           # path to script dir
 
 printDebug "_THIS_SCRIPT  = $_THIS_SCRIPT"
 printDebug "_THIS         = $_THIS"
@@ -152,7 +158,6 @@ for d in "$_THIS_DIR" ~/.config/antu-photo ~ . ; do
 done
 ((ANTU_PHOTO_CFG_LOADED)) || die 51 "No config file antu-photo.cfg found"
 
-photo_config_commands
 photo_config_directories_wrk
 photo_config_directories_nas
 photo_config_directories_rmt
@@ -166,7 +171,7 @@ photo_config_directories_rmt
 # If NAS was not mounted, then use a local logfile
 photo_NASisMounted || LOGFILE="${DIR_PIC%/}/.antu-photo.log"
 
-photo_check_dependencies #ToDo: also sets PATH to GNU coreutils
+photo_check_dependencies #@ToDo: also set PATH to GNU coreutils there
 photo_check_directories
 photo_check_files
 
@@ -178,13 +183,13 @@ photo_check_files
 # MAIN
 ################################################################################
 
-
 printToLog '-------------------------------------------------------------------'
 printToLog "$_THIS started by ${USER:-${USERNAME:-${LOGNAME}}}"
 
 ((CREATE_MISSING_DIRECTORIES)) && photo_create_directories
 
-# --- stage 1 ------------------------------------------------------------------
+
+if ((STAGE_ONE)) ; then #@ ========================================= STAGE 1 ===
 # sort files from INBOX to REVIEW
 
 if [[ -d "$DIR_SRC" ]] ; then
@@ -206,13 +211,14 @@ photo_trash_duplicates "$DIR_ERR"
 
 
 # --- heavy lifting START ---
-#! ToDo: photo_sort() currently only works with '.' as INDIR
+
 photo_sort . "$MOV_REV" "$RGX_MOV"          "Sort Movies"   # move and rename video clips amd movies
 photo_sort . "$DIR_RAW" "$RGX_RAW|$RGX_ARC" "Sort RAW"      # move and rename RAW and archive files
 photo_sort . "$DIR_EDT" "$RGX_EDT"          "Sort EDIT"     # move and rename edited files
 photo_sort . "$DIR_REV" "$RGX_IMG"          "Sort Images"   # move and rename all remaining image files
 
 # --- heavy lifting END ---
+
 
 # per destination directory, check for duplicates
 printVerbose "Next step is to remove duplicates from target directories."
@@ -223,16 +229,14 @@ for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
 	[ -d "$d" ] || break
 	photo_trash_duplicates "${DIR_ORG%/}/$d" "${DIR_RAW%/}/$d"
 done
+popd >/dev/null
 
 pushd "$DIR_REV" >/dev/null
 for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
 	[ -d "$d" ] || break
 	photo_trash_duplicates "${DIR_PIC%/}/$d" "${DIR_REV%/}/$d"
 done
-
 popd >/dev/null
-popd >/dev/null
-
 
 printInfo "Done - remaining files in $DIR_SRC"
 find $( realpath "$DIR_SRC" ) -type f ! -name .DS_Store
@@ -240,35 +244,26 @@ find $( realpath "$DIR_SRC" ) -type f ! -name .DS_Store
 # @Todo: in stage 2 use DIR_ORG instead of DIR_RAW 
 # @Todo: in stage 2 use DIR_PIC instead of DIR_REV
 
-#!## DEVELOP - CONTINUE HERE ####
-exit                         ####
-#!## DEVELOP - CONTINUE HERE ####
+fi # if ((STAGE_ONE)) #@ ======================================= END STAGE 1 ===
 
+#!##########
+DEBUG=1
+VERBOSE=1
+#!##########
 
+if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
+# handle pictures which are actually also originals
 
-# --- stage 1 only -------------------------------------------------------------
+# ToDo: move from REVIEW/RAW   to ORIGINAL
+# ToDo: move from REVIEW/YYYY* to ORIGINAL, if no better RAW is available
+# ToDo: move, don't create new duplicates
+
+	# preparation for photo_parse_filename()
+    enum -1 DIRECTORY BASENAME TRUNK TRUNK1 EXTENSION EXTENSION1 SEQUENCE BACKUP YEAR MONTH DAY HOUR MINUTE SECOND CENTISECOND 
 
 	printInfo "searching for pictures which are actually also originals ..."
 
 	# I. Find original raw files and copy to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
-	printInfo "... find original raw files and copy to RAW"
-	(($DEBUG)) && pause
-
-	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
-		dn="${file%/*}"    # directory name                        /path1/path2
-		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
-		n0="${file##*.}"   # full numbering                        ~3~
-		n1="${n0//\~/}"    # numbering                             3
-		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
-		ex="${b0#*.}"      # extension(s)                          jpg.dop
-		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
-		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
-		sq="${b1#*_}"      # sequence number                       01
-		yy="${fn:0:4}"     # year                                  2017
-		mm="${fn:4:2}"     # month                                 03
-		dd="${fn:6:2}"     # day                                   20
-		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1.     if identical remove current, keep destination
 		# 1.2.     if not identical move current to ERROR
@@ -276,30 +271,38 @@ exit                         ####
 		# 2.1.     both are RAW, move current to ERROR
 		# 2.3.     current is RAW, destination is not, exchange files
 		# 3.   If destination does not exist, move current there
-		# ---
+
+	printInfo "... find original raw files and copy to RAW"
+	(($DEBUG)) && pause
+
+	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		photo_parse_filename "$file"
+		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+
 		# 1.   If destination exists and has same filename, compare files
-		if [[ -e "${ddir%/}/${fn}" ]] ; then
-			cmp --silent "$file" "${ddir%/}/${fn}"
+		if [[ -e "${ddir%/}/${bn}" ]] ; then
+			cmp --silent "$file" "${ddir%/}/${bn}"
 			if [ $? == 0 ] ; then
 				# 1.1. if identical remove current, keep destination
-				printToLog "${fn} identical with file in ${ddir}, removing it"
+				printToLog "${bn} identical with file in ${ddir}, removing it"
 				mv --backup=t -f "${file}" "${DIR_RCY%/}/"
 			else
 				# 1.2. if not identical move current to ERROR
-				printToLog "${fn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
+				printToLog "${bn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
 				mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 			fi
 		else
 			# 2.   If destination exists and has other filename extension
-			if compgen -G "${ddir%/}/${bn}.*" ; then
-				if test -n "$(find ${MAC:+-E} "${ddir}" -maxdepth 1 -iregex ".*/${bn}\.(${RGX_RAW})" -print -quit)"; then
+			if compgen -G "${ddir%/}/${t1}.*" ; then
+				if test -n "$(find ${MAC:+-E} "${ddir}" -maxdepth 1 -iregex ".*/${t1}\.(${RGX_RAW})" -print -quit)"; then
 					# 2.1. both are RAW, move current to ERROR
-					printToLog "Another RAW file type of ${fn} exists in ${ddir}, moving to ${DIR_ERR%/}"
+					printToLog "Another RAW file type of ${bn} exists in ${ddir}, moving to ${DIR_ERR%/}"
 					mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 				else
 					# 2.3. current is RAW, destination is not, exchange files
-					printToLog "Exchanging ${file} with ${ddir%/}/${bn}*"
-					mv --backup=t -f "${ddir%/}/${bn}*" .
+					printToLog "Exchanging ${file} with ${ddir%/}/${t1}*"
+					mv --backup=t -f "${ddir%/}/${t1}*" .
 					mv "${file}" "${ddir}"
 				fi
 			else
@@ -314,24 +317,6 @@ exit                         ####
 
 
 	# II. Find other original image files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
-	printInfo "... find other original image files and copy to RAW"
-	(($DEBUG)) && pause
-
-	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
-		dn="${file%/*}"    # directory name                        /path1/path2
-		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
-		n0="${file##*.}"   # full numbering                        ~3~
-		n1="${n0//\~/}"    # numbering                             3
-		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
-		ex="${b0#*.}"      # extension(s)                          jpg.dop
-		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
-		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
-		sq="${b1#*_}"      # sequence number                       01
-		yy="${fn:0:4}"     # year                                  2017
-		mm="${fn:4:2}"     # month                                 03
-		dd="${fn:6:2}"     # day                                   20
-		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
@@ -340,27 +325,36 @@ exit                         ####
 		# 2.2. both are not RAW, move current to ERROR
 		# 3.   If destination does not exist, move current there
 		# ---
+
+	printInfo "... find other original image files and copy to RAW"
+	(($DEBUG)) && pause
+
+	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		photo_parse_filename "$file"
+		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+
 		# 1.   If destination exists and has same filename, compare files
-		if [[ -e "${ddir%/}/${fn}" ]] ; then
-			cmp --silent "$file" "${ddir%/}/${fn}"
+		if [[ -e "${ddir%/}/${bn}" ]] ; then
+			cmp --silent "$file" "${ddir%/}/${bn}"
 			if [ $? == 0 ] ; then
 				# 1.1. if identical remove current, keep destination
-				printToLog "${fn} identical with file in ${ddir}, removing it"
+				printToLog "${bn} identical with file in ${ddir}, removing it"
 				mv --backup=t -f "${file}" "${DIR_RCY%/}/"
 			else
 				# 1.2. if not identical move current to ERROR
-				printToLog "${fn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
+				printToLog "${bn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
 				mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 			fi
 		else
 			# 2.   If destination exists and has other filename extension
-			if compgen -G "${ddir%/}/${b1}.*" ; then
-				if test -n "$(find ${MAC:+-E} ${ddir%/} -maxdepth 1 -iregex ".*/${b1}\.(${RGX_RAW})" -print -quit)"; then
+			if compgen -G "${ddir%/}/${tr}.*" ; then
+				if test -n "$(find ${MAC:+-E} ${ddir%/} -maxdepth 1 -iregex ".*/${tr}\.(${RGX_RAW})" -print -quit)"; then
 					# 2.1. destination is RAW, current is not, do nothing (will be found in next step)
-					printToLog "A RAW version of ${fn} exists in ${ddir}. (nothing done)"
+					printToLog "A RAW version of ${bn} exists in ${ddir}. (nothing done)"
 				else
 					# both are not RAW, move current to ERROR
-					printToLog "Another file type of ${fn} exists in ${ddir}, moving to ${DIR_ERR%/}"
+					printToLog "Another file type of ${bn} exists in ${ddir}, moving to ${DIR_ERR%/}"
 					mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 				fi
 			else
@@ -375,39 +369,29 @@ exit                         ####
 
 
 	# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
-	printInfo "... find other image files and move to EDIT"
-	(($DEBUG)) && pause
-
-	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/${RGX_DAT}(_[0-9][0-9]?)?\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
-		dn="${file%/*}"    # directory name                        /path1/path2
-		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
-		n0="${file##*.}"   # full numbering                        ~3~
-		n1="${n0//\~/}"    # numbering                             3
-		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
-		ex="${b0#*.}"      # extension(s)                          jpg.dop
-		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
-		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
-		sq="${b1#*_}"      # sequence number                       01
-		yy="${fn:0:4}"     # year                                  2017
-		mm="${fn:4:2}"     # month                                 03
-		dd="${fn:6:2}"     # day                                   20
-		ddir="${DIR_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
 		# 2.   If destination does not exist, move current there
-		# ---
+
+	printInfo "... find other image files and move to EDIT"
+	(($DEBUG)) && pause
+
+	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		photo_parse_filename "$file"
+		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		ddir="${DIR_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+
 		# 1.   If destination exists and has same filename, compare files
-		if [[ -e "${ddir%/}/${fn}" ]] ; then
-			cmp --silent "$file" "${ddir%/}/${fn}"
+		if [[ -e "${ddir%/}/${bn}" ]] ; then
+			cmp --silent "$file" "${ddir%/}/${bn}"
 			if [ $? == 0 ] ; then
 				# 1.1. if identical remove current, keep destination
-				printToLog "${fn} identical with file in ${ddir}, removing it"
+				printToLog "${bn} identical with file in ${ddir}, removing it"
 				mv --backup=t -f "${file}" "${DIR_RCY%/}/"
 			else
 				# 1.2. if not identical move current to ERROR
-				printToLog "${fn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
+				printToLog "${bn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
 				mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 			fi
 		else
@@ -419,44 +403,32 @@ exit                         ####
 	done
 	
 	# Note: on stage 1, skipping step IV (archive files)
-	printInfo "... skipping Archive files"
+	printInfo "... skipping Archive files, if any"
 
-	# V. Find SideCar files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
-
-	printInfo "... find SideCar files and move to RAW"
-	(($DEBUG)) && pause
-
-	find ${MAC:+-E} "${DIR_PIC%/}" -iregex ".*/(${RGX_DAT}|${RGX_DAY})(_[0-9][0-9]?)?.*\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		#  "${file}"       # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
-		dn="${file%/*}"    # directory name                        /path1/path2
-		fn="${file##*/}"   # full file name                        20170320-065042_01.jpg.dop.~3~
-		n0="${file##*.}"   # full numbering                        ~3~
-		n1="${n0//\~/}"    # numbering                             3
-		b0="${fn%%.~*}"    # file name without numbering           20170320-065042_01.jpg.dop
-		ex="${b0#*.}"      # extension(s)                          jpg.dop
-		b1="${b0%%.*}"     # file base name (w/o extension(s))     20170320-065042_01
-		bn="${b1%%_*}"     # file base name (w/o sequence number)  20170320-065042
-		sq="${b1#*_}"      # sequence number                       01
-		yy="${fn:0:4}"     # year                                  2017
-		mm="${fn:4:2}"     # month                                 03
-		dd="${fn:6:2}"     # day                                   20
-		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
-		echo "$fn"
+	# V. Find SideCar files and move to EDIT/SIDECAR/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 		# 1.   If destination exists and has same filename, compare files (md5?)
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
 		# 2.   If destination does not exist, move current there
-		# ---
+
+	printInfo "... find SideCar files and move to EDIT/SIDECAR"
+	(($DEBUG)) && pause
+
+	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		photo_parse_filename "$file"
+		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		ddir="${DIR_CAR%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+
 		# 1.   If destination exists and has same filename, compare files
-		if [[ -e "${ddir%/}/${fn}" ]] ; then
-			cmp --silent "$file" "${ddir%/}/${fn}"
+		if [[ -e "${ddir%/}/${bn}" ]] ; then
+			cmp --silent "$file" "${ddir%/}/${bn}"
 			if [ $? == 0 ] ; then
 				# 1.1. if identical remove current, keep destination
-				printToLog "${fn} identical with file in ${ddir}, removing it"
+				printToLog "${bn} identical with file in ${ddir}, removing it"
 				mv --backup=t -f "${file}" "${DIR_RCY%/}/"
 			else
 				# 1.2. if not identical move current to ERROR
-				printToLog "${fn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
+				printToLog "${bn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
 				mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 			fi
 		else
@@ -467,10 +439,10 @@ exit                         ####
 		fi
 	done
 
+fi # if ((STAGE_TWO)) #@ ======================================= END STAGE 2 ===
 
 
-
-
+# ToDo check, if GPS extract can be done. And at what stage
 # if [ "$1" != "--stage2" ] ; then
 #  echo "... extracting GPS coordinates"
 #  # assuming we have pictures from after the year 2000

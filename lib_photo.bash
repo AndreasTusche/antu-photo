@@ -1,6 +1,6 @@
 #
 # -*- mode: bash; tab-width: 4 -*-
-#
+################################################################################
 # NAME
 #   lib_photo.bash - Library of common functions for bash scripts
 #
@@ -161,7 +161,6 @@ function photo_check_bash() { # [VERSION]
 }
 
 
-
 #===============================================================================
 # NAME
 #	photo_check_dependencies - check if necessary tools are installed
@@ -273,7 +272,9 @@ function photo_check_files() {  # [VARIBALE_NAME_FOR_FILES ...]
 	if [[ ${#@} -gt 0 ]]; then
 		ff=( $@ )
 	else
-		photo_COMMANDS=( CMD_correcttim CMD_extractgps CMD_intrpltgps CMD_sortphotos CMD_trashdupes CMD_wakeup_nas LIB_antu_photo )
+# ToDo: Trying without the other scripts, use functions instead
+#//		photo_COMMANDS=( CMD_correcttim CMD_extractgps CMD_intrpltgps CMD_sortphotos CMD_trashdupes CMD_wakeup_nas LIB_antu_photo )
+		photo_COMMANDS=( "" )
 		photo_FILESGPS=( GPS_FMT )
 		photo_LOGFILES=( LOGFILE )
 		ff=( ${photo_COMMANDS[@]} ${photo_FILESGPS[@]} ${photo_LOGFILES[@]} )
@@ -413,16 +414,17 @@ function photo_isLocalNAS() {
 #	and its sub-directories and move them all to the DESTINATION_DIR. 
 #
 # OPTIONS
-#	SOURCE_DIR
-#	DESTINATION_DIR
-#	REGULAR_EXPRESSION
-#	MESSAGE
+#	SOURCE_DIR          source directory of images and side-cars
+#	DESTINATION_DIR     destination directory, subdirectories will be created
+#	REGULAR_EXPRESSION  file name extensions, as RegExp suitable for `find`
+#	MESSAGE             optional message, displayed in verbose or debug mode
 #
-# GLOBALS
-#	DEBUG
-#	GNU_mv
-#	MAC
-#	RGX_CAR
+# ENVIRONMENT
+#	DEBUG    0: no 1: debug putput
+#	GNU_mv   path to the GNU version of the `mv`command
+#	LOGFILE  path to the log file
+#	MAC      0: if not running on Mac, 1: if running on Mac
+#	RGX_CAR  Regular expression for side-car file name extensions
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
@@ -563,17 +565,22 @@ function photo_parse_date() { # [-f|-t] FILENAME
 # OPTIONS
 #	FILENAME  Input filename. A file of that name does not need to exist.
 #
+# EXAMPLE
+#	photo_parse_filename "Pictures/SAVE/_2019-01-21/20190121-081751.jpg.dop"
+#	read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+#	echo $tr # prints "20190121-081751"
+#
 # BUGS
-#	Dates before 1900 are not supported. Two-digit years <71 will be interpreted
-#	as years 2000 to 2070, and >70 as years 1970 to 1999 (limitations of `date`)
+#	Two-digit years <71 will be interpreted as years 2000 to 2070, and >70 as
+#	years 1970 to 1999 (limitation of `date`).
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
-#====================================================================V.210103===
+#====================================================================V.210514===
 
 function photo_parse_filename() { # FILENAME
 	printDebug "${FUNCNAME}( $@ )"
-    local fn dn bn tr t1 ex e1 sq ba yy mm dd hh mi ss cs x
+    local fn dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs x yoffset=0
 
     fn="$1"                             # file name with path                   /path1/path2/20170320-065042_01.jpg.dop.~3~
     dn="${fn%/*}"                       # directory name                        /path1/path2
@@ -600,13 +607,18 @@ function photo_parse_filename() { # FILENAME
 	if [ "$t1" == "" ]; then t1="$tr"; fi
 
     [[ "$ex" =~ .*~([0-9]*)~ ]]
-    ba="${BASH_REMATCH[1]-}"            # backup number                         3
+    bu="${BASH_REMATCH[1]-}"            # backup number                         3
 
 	# normalised date             |-yy-------------------|        |-mm-----|         |-dd-----|         |-hh-----|         |-mi-----|         |-ss-----|         |-cs-----|
 	[[ "${bn}0000000000000000" =~ ([1-9][0-9]{3}|[0-9]{2})([^0-9]*[0-9]{1,2})([^0-9]*[0-9]{1,2})([^0-9]*[0-9]{1,2})([^0-9]*[0-9]{1,2})([^0-9]*[0-9]{1,2})([^0-9]*[0-9]{1,2}).* ]]
 	read x yy mm dd hh mi ss cs <<< ${BASH_REMATCH[@]//[!0-9]/}
-	(( mm = mm < 1 ? 1 : mm ))
-	(( dd = dd < 1 ? 1 : dd ))
+	(( mm = 10#$mm < 1 ? 1 : 10#$mm ))
+	(( dd = 10#$dd < 1 ? 1 : 10#$dd ))
+
+	if (( 10#$yy>100 && 10#$yy<1900 )); then # work around date limitation # Todo: not accurate for leap years
+		yoffset=$(( 2000 - 10#$yy ))
+		yy=2000
+	fi
 
 	if $( date --version >/dev/null 2>&1 ) ; then # GNU 'date'
 		read yy mm dd hh mi ss <<< $( date +"%Y %m %d %H %M %S" -d "$yy-1-1 +$(( 10#$mm-1 )) months +$(( 10#$dd-1 )) days +$hh hours +$mi minutes +$ss seconds" )
@@ -614,9 +626,12 @@ function photo_parse_filename() { # FILENAME
 		read yy mm dd hh mi ss <<< $( date -j -v+$(( 10#$mm-1 ))m -v+$(( 10#$dd-1 ))d -v+${hh}H -v+${mi}M -v+${ss}S "01010000${yy}.00" +"%Y %m %d %H %M %S" )
 	fi
 
-    if [[ ${CENTISECOND-0} != 15 ]]; then
+	yy=$(( yy - yoffset ))
+	yy=${yy: -4:4}
+
+    if [[ ${CENTISECOND-0} != 15 ]]; then 
         enum -1 DIRECTORY BASENAME TRUNK TRUNK1 EXTENSION EXTENSION1 SEQUENCE BACKUP YEAR MONTH DAY HOUR MINUTE SECOND CENTISECOND 
-    #   enum -1 DN        BN       TR    T1     EX        E1         SQ       BA     YY   MM    DD  HH   MI     SS     CS         
+    #   enum -1 DN        BN       TR    T1     EX        E1         SQ       BU     YY   MM    DD  HH   MI     SS     CS         
     fi
 
     unset REPLY
@@ -633,8 +648,8 @@ function photo_parse_filename() { # FILENAME
     #// REPLY[EXT1]="$x1"
     #// REPLY[EXT2]="$x2"
     #// REPLY[EXT3]="$x3"
-    REPLY[SEQUENCE]="$sq"
-    REPLY[BACKUP]="$ba"
+    REPLY[SEQUENCE]="${sq:-00}"
+    REPLY[BACKUP]="${bu:-00}"
     REPLY[YEAR]="$yy"
     REPLY[MONTH]="$mm"
     REPLY[DAY]="$dd"
@@ -643,6 +658,8 @@ function photo_parse_filename() { # FILENAME
     REPLY[SECOND]="$ss"
     REPLY[CENTISECOND]="$cs"
 	#// ((DEBUG)) && set +x
+
+	printDebug ${REPLY[*]}
 }
 
 
@@ -655,12 +672,23 @@ function photo_parse_filename() { # FILENAME
 #	photo_sort SOURCE_DIR DESTINATION_DIR REGULAR_EXPRESSION [MESSAGE]
 #
 # DESCRIPTION
+#	This moves files that match the REGULAR_EXPRESSION from the SOURCE_DIR and
+#	its subdirectories to the temporary directory (defined by global DIR_TMP).
+#	From there it moves images and their side-car files to the DESTINATION_DIR,
+#	based on the EXIF information of the images.
 #
 # OPTIONS
-#	SOURCE_DIR
-#	DESTINATION_DIR
-#	REGULAR_EXPRESSION
-#	MESSAGE
+#	SOURCE_DIR          source directory of images and side-cars
+#	DESTINATION_DIR     destination directory, subdirectories will be created
+#	REGULAR_EXPRESSION  file name extensions, as RegExp suitable for `find`
+#	MESSAGE             optional message, displayed in verbose or debug mode
+#
+# ENVIRONMENT
+#	DEBUG    0: no 1: debug output
+#	DIR_TMP  path to temporary directory
+#
+# EXAMPLES
+#	photo_sort ~/Pictures/INBOX ~/Pictures/review "gif|jpg|png" "Sort images"
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
