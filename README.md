@@ -16,7 +16,7 @@ The workflow is modelled mainly to support these two main requirements:
 * Archiving - Put the files in a safe place and never touch again.
 * Browsing  - Have all images in a catalogue with metadata.
 
-'Editing' is not part of the workflow because the working files and results are just a different kind of input to the workflow again.
+'Editing' is not part of the workflow because the working files and results are again just a different kind of input to the workflow.
 
 
 
@@ -163,7 +163,7 @@ Older photos may origin from Photo CDs, scans of paper photos or of film negativ
 | In brief |
 |:-|
 | Use RAW whenever possible. |
-| At each location use a GPS tracker or take a photo with a geo-location phone. |
+| At each location use a GPS tracker or take one photo with a geo-location phone. |
 | Always have the camera clock precisely set and take a photo of an accurate time-stamp. |
 
 
@@ -178,7 +178,10 @@ This is the directory structure which I decided to use. It may look somewhat ove
 ```
     ~
     ├── .Trash
-    ├── Movies
+	├── Movies
+	│   └── REVIEW
+	│   │   └── YYYY
+	│   │       └── YYYY-MM-DD
     │   └── YYYY
     │       └── YYYY-MM-DD
     └── Pictures
@@ -199,19 +202,18 @@ This is the directory structure which I decided to use. It may look somewhat ove
         │   └── [where]
         │       └── YYYY
         │           └── YYYY-MM-DD
-        ├── REVIEW
-        │   ├── DUPLICATES
-        │   ├── ERROR
-        │   ├── TMP
-        │   └── YYYY
-        │       └── YYYY-MM-DD
-        └── YYYY
-            └── YYYY-MM-DD
+        └── REVIEW
+	        ├── ERROR
+	        │   └── DUPLICATES
+	        ├── TMP
+	        ├── RAW
+	        └── YYYY
+	            └── YYYY-MM-DD
 ```
 
 ##### Subdirectories and file names
 
-Although I do not want to have sorting by camera, lens, events, locations or people, I discuss some options that you may consider for your workflow.
+I just want my photos sorted by date and time, I do not want to have additional sorting options, e.g. by camera, lens, events, locations or people. Anyhow I discuss some options that you may consider for your workflow.
 
 ###### By Date and Time
 
@@ -225,11 +227,11 @@ If several pictures were shot at the same second, then a two-digit frame number 
 
     ./YYYY/YYYY-MM-DD/YYYYMMDD-hhmmss_ff.jpg
 
-This is the default for the little script [photo-sort-time.bash](#photo-sort-time) which I describe further down.
+This allows for up to 100 photos per second, about four times the frame rate of a conventional movie. This is my default setting and confogured as such in the [antu-photo.cfg]() configuration file.
 
 ###### By Start, End, and Production Date and Time
 
-For single shots the creation date is enough but when you are also taking very long exposures or video clips you may want to have a start and an end date. Maybe you also want a modification date in the filename, like so
+For single shots the creation date is enough but when you are also taking very long exposures or video clips you may want to have a start and end date. Maybe you also want a modification date in the filename, like so
 
 ```
      ./YYYY/YYYY-MM-DD/YYYYMMDDhhmmss_YYYYMMDDhhmmss_YYYYMMDDhhmmss.jpg
@@ -257,7 +259,7 @@ I copy _all_ photos I took from the camera SD card to the Inbox:
 
     ~/Pictures/INBOX/
 
-Doing this step manually usually avoids creating duplicates. The original files stay on the SD card until I have at least properly archived these new files. If I accidentally corrupt the new files on my computer, if one of my scripts develops its own mind or if something else goes wrong, then I always can start over, going back to the originals on the SD card.
+Doing this step manually usually avoids creating duplicates. The original files stay on the SD card until I have at least properly archived these new files. If I accidentally corrupt the new files on my computer, if one of my scripts develops its own mind or if something else goes wrong, then I always can start over, going back to the originals from the SD card.
 
 Copying can be done using the Finder or, as I prefer it, from the Unix command line, using `rsync`. In case of partial transfers the incomplete files should be kept away in a dedicated directory. So I type
 
@@ -280,7 +282,7 @@ Unwanted stuff goes to
 : `~/Pictures/REVIEW/ERROR/`
 
 Video clips go to
-: `~/Movies/YYYY/YYYY-MM-DD/`
+: `~/Movies/REVIEW/YYYY/YYYY-MM-DD/`
 
 RAW images go to
 : `~/Pictures/ORIGINAL/YYYY/YYYY-MM-DD/`
@@ -295,14 +297,14 @@ Regular photos get sorted to
 : `~/Pictures/REVIEW/YYYY/YYYY-MM-DD`
 
 Duplicates go to
-: `~/Pictures/REVIEW/DUPLICATES/`
+: `~/Pictures/REVIEW/ERROR/DUPLICATES/`
 
 Unwanted stuff are image-catalogues, application directories or third party libraries that may be mistaken as images in a later step. They are recognised by their file extension:
 
     .app .dmg .icbu .imovielibrary .keynote .oo3 .mpkg .numbers
     .pages .photoslibrary .pkg .theater .webarchive
 	
-In above list, the `.imovielibrary` and `.photoslibrary` actually are directories created by the macOS iMovie or Photo Applications respectively. The problem with those is, that they contain the original videos or photos but also a lot of smaller, cropped or edited variants or thumbnails. If you want to extract the originals from there, then just place the `.imovielibrary/*/Original Media/` or `.photoslibrary/Masters/` directories in the INBOX (`~/Pictures/INBOX/`).
+In above list, the `.imovielibrary` and `.photoslibrary` actually are directories created by the macOS iMovie or Photo Applications respectively. They are problematic because they not only contain the original videos or photos but also a lot of smaller, cropped or edited variants or thumbnails. If you want to extract the originals from there, then just place the `.imovielibrary/*/Original Media/` or `.photoslibrary/Masters/` directories in the INBOX (`~/Pictures/INBOX/`).
 
 Movies are recognised by their file extension:
 
@@ -337,9 +339,11 @@ DIR="~/Pictures/REVIEW/TMP/"
 find -E . -iregex ".*\.($EXT)" -exec mv -v -n "{}" "$DIR" \;
 ```
 
-From there the images, RAW images or files are renamed to `YYYYMMDD-hhmmss.xxx`. If two or more files were taken at the same second, the filename will be suffixed with a an incremental frame number: `YYYYMMDD-hhmmss_ff.xxx`. The renamed files are moved to the respective `YYYY/YYYY-MM-DD` directories 
+From there the images, RAW images or files are renamed to `YYYYMMDD-hhmmss.xxx`. If two or more files were taken at the same second, the filename will be suffixed with a an incremental frame number: `YYYYMMDD-hhmmss_ff.xxx`. The renamed files are moved to the respective `YYYY/YYYY-MM-DD` directories. 
 
-At any time, duplicated files may be identified. For later manual inspection they are moved to `~/Pictures/REVIEW/DUPLICATES/`. It turned out that for my workflow, the duplicates are the biggest problem — I shall write an extra chapter for this. 
+At any time, duplicated files may be identified. Binary identical files will be moved to the Trash, leaving only one copy. Other files which seem to be identical in any other way are moved to `~/Pictures/REVIEW/ERROR/DUPLICATES/` for later manual inspection.
+
+For my workflow, the duplicates are the biggest problem — I shall write an extra chapter for this. 
 
 
 #### Automate it - the script
@@ -350,7 +354,9 @@ All the heavy-lifting is done by the excellent [ExifTool](http://www.sno.phy.que
 
 The ExifTool is a platform-independent Perl library plus a command-line application for reading, writing and editing meta information in a wide variety of files. ExifTool supports many different metadata formats.
 
-The MacOS package installs the ExifTool command-line application and libraries in `/usr/local/bin`. After installing, type `exiftool` in a Terminal window to run exiftool and read the application documentation. It has a steep learning curve but is worth it.
+The MacOS package installs the ExifTool command-line application and libraries in `/usr/local/bin`. When installing via [Homebrew](http://brew.sh/) the files are installed at `/usr/local/Cellar/exiftool/[version]/bin/exiftool` and then linked to `/usr/local/bin`.
+
+After installing, type `exiftool` in a Terminal window to run exiftool and read the application documentation. It has a steep learning curve but is worth it.
 
 A Note to Unix Power-Users. If you find the need to use "find" or "awk" in conjunction with ExifTool, then you probably haven't discovered the full power of ExifTool. Read about the `-ext`, `-if`, `-p` and `-tagsFromFile` options in the application documentation. (This is common mistake number 3.) Often users write shell scripts to do some specific batch processing when the exiftool application already has the ability to do this either without scripting or with a greatly simplified script. This includes the ability to recursively scan sub-directories for a specific file extension (case insensitive), rename files from metadata values, and move files to different directories.
 
@@ -488,13 +494,13 @@ DIR_SRC=~/Pictures/INBOX/
 DIR_TMP=~/Pictures/REVIEW/tmp_sortphotos/
 
 RGX_EDT="afphoto|bmp|eps|ico|pdf|psd"
-RGX_ERR="app|dmg|icbu|imovielibrary|keynote|oo3|mpkg|numbers|pages|potoslibrary|pkg|theater|webarchive"
+RGX_BAD="app|dmg|icbu|imovielibrary|keynote|oo3|mpkg|numbers|pages|potoslibrary|pkg|theater|webarchive"
 RGX_MOV="3g2|3gp|aae|asf|avi|drc|flv|f4v|f4p|f4a|f4b|lrv|m4v|mkv|modmoi|mov|qt|mp4|m4p|mpg|mp2|mpeg|mpe|mpv|mpg|mpeg|m2v|ogv|ogg|pgi|rm|mvb|roq|svi|vob|webm|wmv|yuv"
 RGX_RAW="3fr|3pr|ari|arw|bay|cap|ce[12]|cib|cmt|cr[23]|craw|crw|dc2|dcr|dcs|dng|eip|erf|exf|fff|fpx|gray|grey|gry|heic|iiq|kc2|kdc|kqp|lfr|mdc|mef|mfw|mos|mrw|ndd|nef|nop|nrw|nwb|olr|orf|pcd|pef|ptx|r3d|ra2|raf|raw|rw2|rwl|rwz|sd[01]|sr2|srf|srw|st[45678]|stx|x3f|ycbcra"
 
 cd $DIR_SRC
 # move errornous files out of the way
-find -E . -iregex ".*\.($RGX_ERR)" -exec mv -v -n "{}" $DIR_ERR \;
+find -E . -iregex ".*\.($RGX_BAD)" -exec mv -v -n "{}" $DIR_ERR \;
 
 # move and rename Videos
 find -E . -iregex ".*\.($RGX_MOV)" -exec mv -v -n "{}" $DIR_TMP \;
