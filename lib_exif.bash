@@ -87,11 +87,12 @@ function exif_find_images_and_sidecars() { # REGEXP CONDITIONS
 	local _RX="$1"; shift
 	local b e f
 
-	if [[ "$_RX" == "" || "$_RX" == "*" ]]; then 
-		unset _RX
-	else 
-		_RX="-ext ${_RX//|/ -ext }"
-	fi
+	case "$_RX" in
+		"*")    unset _RX ;;
+		"-@")   _RX="-@ $1"; shift ;;
+		"-ext") _RX="-ext ${1//|/ -ext }" ; shift ;;
+		*)      _RX="-ext ${_RX//|/ -ext }" ;;
+	esac
 
 	rm args_CAR.tmp args_IMG.tmp 2>/dev/null
 	exiftool \
@@ -251,7 +252,6 @@ function exif_sort_images_and_sidecars_time_frame() { # [-n|--test] INDIR OUTDIR
 	OUTDIR="$( realpath "${2:-${DIR_PIC}}" )"               # put files in subdirectories
 	_d_option="-d ${OUTDIR%/}/%Y/%Y-%m-%d/%Y%m%d-%H%M%S"    # subdirectories to OUTDIR
 	_rule_ext='%+2c.${FileTypeExtension}.%e'                # rule for conflict counter, file extension + .%e for Sidecars
-
 
 	# ToDo: This takes too long. First find files with SequenceNumber, then check for time-stamps
 	printInfo "... sorting by time and sequence number (if any)" #--------------
