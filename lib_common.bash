@@ -264,7 +264,7 @@ function debugFunctionCalls() {
 #	die - terminate script
 #
 # SYNOPSIS
-#	die [ERRORCODE [MESSAGE]]
+#	die [ERRORCODE] [MESSAGE]
 #
 # DESCRIPTION
 #	This will terminate the running script
@@ -273,9 +273,9 @@ function debugFunctionCalls() {
 #	Andreas Tusche <www.andreas-tusche.de>
 #====================================================================V.210513===
 
-function die() { # [ERRORCODE [MESSAGE]]
+function die() { # [ERRORCODE] [MESSAGE]
 	printDebug "${FUNCNAME}( $@ )"
-	local err=${1-1}; 
+	local err=${1-}; 
 	isNumber "$err" && shift || err=1
 	[ -z ${1+x} ] || printError "$@"
 	exit $err
@@ -586,6 +586,7 @@ function pause() { # [SECONDS [PROMPT]]
 #	printFolded   - print text with left or right margin
 #	printInfo     - print coloured message
 #	printInfo2    - print indented coloured message
+#	printToLog    - print message to log file
 #	printVerbose  - print coloured message, if in VERBOSE mode
 #	printVerbose2 - print indented coloured message, if in VERBOSE mode
 #	printWarning  - print coloured warning message
@@ -594,6 +595,7 @@ function pause() { # [SECONDS [PROMPT]]
 # SYNOPSIS
 #	printDebug    [options] STRING
 #	printDebug2   [options] STRING
+#	printDebugArr "${ARRAYNAME[@]}"
 #	printDebugVar VARNAME
 #	printError    [options] STRING
 #	printError2   [options] STRING
@@ -614,7 +616,7 @@ function pause() { # [SECONDS [PROMPT]]
 #	Long messages will be folded and indented.
 #	Further indented lines can be printed using the print*2() functions.
 #	Use these funtions if the output is expected on a terminal window. For
-#	logging purposes (using a log file) use the log*() functions instead.
+#	logging purposes (using a log file) use the printToLog() function.
 #
 # OPTIONS
 #	STRING  The string to be printed, prefixed by the current time and the
@@ -694,7 +696,7 @@ function printDebug()    { ((DEBUG))   && printFolded -c 12 -i 30 "$(date +'%F %
 function printError()    {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;91mERROR  :\033[0;91m" "${@}\033[0m" ; }
 function printInfo()     {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;32mINFO   :\033[0;32m" "${@}\033[0m" ; }
 function printVerbose()  { ((VERBOSE)) && printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;32mINFO   :\033[0;32m" "${@}\033[0m" >&2 ; }
-function printWarning()  {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;93mWARNING:\033[0;93m" "${@}\033[0m" ; }
+function printWarning()  {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;33mWARNING:\033[0;33m" "${@}\033[0m" ; }
 
 function printDebug2()   { ((DEBUG))   && printFolded -c  9 -1 29 -i 30 "\033[0;35m" "${@}\033[0m" >&2 ; }
 function printError2()   {                printFolded -c  9 -1 29 -i 30 "\033[0;91m" "${@}\033[0m" ; }
@@ -702,12 +704,19 @@ function printInfo2()    {                printFolded -c  9 -1 29 -i 30 "\033[0;
 function printVerbose2() { ((VERBOSE)) && printFolded -c  9 -1 29 -i 30 "\033[0;32m" "${@}\033[0m" >&2 ; }
 function printWarning2() {                printFolded -c  9 -1 29 -i 30 "\033[0;93m" "${@}\033[0m" ; }
 
+function printDebugArr() {
+	printDebug $(printf '"%s" ' "${@}")
+}
+
 function printDebugVar() {
-	if [ -z ${1+x} ]; then
-		printDebug "$1 is unset"  # won't come here if `set -o nounset`
-	else
-		printDebug "$1 = '${!1}'" # doesn't work for arrays # TODO find a way for arrays
-	fi
+	for v in "$@"; do 
+		printDebug "$v = '${!v}'"
+	done
+	# if [ -z ${1+x} ]; then
+	# 	printDebug "$1 is unset"  # won't come here if `set -o nounset`
+	# else
+	# 	printDebug "$1 = '${!1}'" # doesn't work for arrays
+	# fi
 }
 
 function printToLog()    {

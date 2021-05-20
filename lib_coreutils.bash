@@ -1,4 +1,28 @@
-# source this to avoid having all coreutils in the PATH
+#
+# -*- mode: bash; tab-width: 4 -*-
+################################################################################
+#
+# NAME
+#   lib_coreutils.bash - source this to avoid having all coreutils in the PATH
+#
+# SYNOPSIS
+#   source lib_coreutils.bash
+#
+# DESCRIPTION
+#	This library replaces command calls by function calls to the coreutils in
+#   /usr/local/opt/coreutils/libexec/gnubin
+#
+#   To recreate this library, run make_lib_coreutils.bash
+#
+# AUTHOR
+#	@author     Andreas Tusche <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2021-2021, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
+# 2021-05-16 auto created
+
 ((DEBUG)) && echo -n "[ . $BASH_SOURCE "
 # uncomment those commands you need
 # [()         { /usr/local/opt/coreutils/libexec/gnubin/[ "$@"; } ; GNU_[="/usr/local/opt/coreutils/libexec/gnubin/["

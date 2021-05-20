@@ -1,6 +1,7 @@
 #
 # -*- mode: bash; tab-width: 4 -*-
 ################################################################################
+#
 # NAME
 #   lib_photo.bash - Library of common functions for bash scripts
 #
@@ -566,9 +567,19 @@ function photo_parse_date() { # [-f|-t] FILENAME
 #	FILENAME  Input filename. A file of that name does not need to exist.
 #
 # EXAMPLE
-#	photo_parse_filename "Pictures/SAVE/_2019-01-21/20190121-081751.jpg.dop"
-#	read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
-#	echo $tr # prints "20190121-081751"
+# 	To parse a file name and retrieve all elements in the calling script, the
+#	'read' command can be used. This will only work, if the path and the file-
+#	name do not contain any white space characters.
+#		photo_parse_filename "Pictures/2019-01-21/20190121-081751_42.jpg.dop"
+#		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+#		echo $tr # prints "20190121-081751_42"
+#
+# 	To parse a file name and retrieve specific elements in the calling script,
+#	the REPLY array can be used. This also works, if the path or the file-
+#	name not contain some white space characters.
+#		photo_parse_filename "Pictures/2019-01-21/20190121-081751_42.jpg.dop"
+#		tr="${REPLY[TRUNK1]}"
+#		echo $t1 # prints "20190121-081751"
 #
 # BUGS
 #	Two-digit years <71 will be interpreted as years 2000 to 2070, and >70 as
@@ -642,12 +653,6 @@ function photo_parse_filename() { # FILENAME
     REPLY[TRUNK1]="$t1"
     REPLY[EXTENSION]="$ex"
     REPLY[EXTENSION1]="$e1"
-    #// REPLY[PART1]="$p1"
-    #// REPLY[PART2]="$p2"
-    #// REPLY[PART3]="$p3"
-    #// REPLY[EXT1]="$x1"
-    #// REPLY[EXT2]="$x2"
-    #// REPLY[EXT3]="$x3"
     REPLY[SEQUENCE]="${sq:-00}"
     REPLY[BACKUP]="${bu:-00}"
     REPLY[YEAR]="$yy"
@@ -659,7 +664,7 @@ function photo_parse_filename() { # FILENAME
     REPLY[CENTISECOND]="$cs"
 	#// ((DEBUG)) && set +x
 
-	printDebug ${REPLY[*]}
+	#printDebugArr "${REPLY[@]}"
 }
 
 
@@ -802,7 +807,7 @@ function photo_trash_duplicates() { # DIRECTORY
 	if [[ ${DEBUG:-0} == 0 ]]; then
 		fdupes -AdNnqr -o name -l $LOGFILE $( realpath -q "$@" ) >/dev/null 2>/dev/null 
 	else
-		fdupes -AdNnqr -o name -l $LOGFILE $( realpath -q "$@" )
+		fdupes -AdNnr -o name -l $LOGFILE $( realpath -q "$@" )
 	fi
 
 	return

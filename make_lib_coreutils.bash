@@ -8,7 +8,32 @@ u=""
 
 if [ -e $l ]; then u="$( awk '!/^# /{printf $1}' $l )x"; fi
 
-echo "# source this to avoid having all coreutils in the PATH" >$l
+echo '#
+# -*- mode: bash; tab-width: 4 -*-
+################################################################################
+#
+# NAME
+#   lib_coreutils.bash - source this to avoid having all coreutils in the PATH
+#
+# SYNOPSIS
+#   source lib_coreutils.bash
+#
+# DESCRIPTION
+#	This library replaces command calls by function calls to the coreutils in
+#   '"$d"'
+#
+#   To recreate this library, run '"${0##*/}"'
+#
+# AUTHOR
+#	@author     Andreas Tusche <antu-photo@andreas-tusche.de>
+#	@copyright  (c) 2021-'$(date +"%Y")', Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu-photo
+#
+# when       who  what
+# ---------- ---- --------------------------------------------------------------
+# '$(date +"%Y-%m-%d")' auto created
+' >$l
+
 echo "((DEBUG)) && echo -n \"[ . \$BASH_SOURCE \""  >>$l
 echo "# uncomment those commands you need" >>$l
 

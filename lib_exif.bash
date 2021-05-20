@@ -1,5 +1,6 @@
 #
 # -*- mode: bash; tab-width: 4 -*-
+################################################################################
 #
 # NAME
 #   lib_exif.bash - Library of exiftool functions
@@ -234,7 +235,7 @@ function exif_move_images_and_sidecars() { # OUTDIR RULES_FOR_SIDECARS
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
-#===========================================================V.190825-V.210131===
+#====================================================================V.210131===
 
 function exif_sort_images_and_sidecars_time_frame() { # [-n|--test] INDIR OUTDIR
 	printDebug "${FUNCNAME}( $@ )"
