@@ -34,6 +34,13 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-14 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 T=$(bc <<< 1*0${1//[^-0-9]/})          # make sure we have a number
 DIRNAME="$( readlink -f "${2:-$(pwd)}" )"
 
@@ -43,15 +50,17 @@ case "$#" in
     *) echo "USAGE: ${0##*/} SECONDS [FILENAME|DIRNAME]"; exit 1;;
 esac
 
-if [[ $T > 0 ]]; then
-    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
-        -m -overwrite_original_in_place -progress: -q \
-        -AllDates+="::$T" -SonyDateTime+="::$T" -IFD1:ModifyDate+="::$T" -FileModifyDate+="::$T" \
-        $DIRNAME
-else
+if [[ $T < 0 ]]; then
     T=$(bc <<< -1*${T})                # make sure we have a positive number
-    exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
-        -m -overwrite_original_in_place -progress: -q \
-        -AllDates-="::$T" -SonyDateTime-="::$T" -IFD1:ModifyDate-="::$T" -FileModifyDate-="::$T" \
-        $DIRNAME
 fi
+
+# Special handling for .mov QuickTime Videos
+exiftool -ext mov \
+	-m -overwrite_original_in_place -progress: -q -Quicktime:AllDates="$T" \
+    "$DIRNAME"
+
+# All other files
+exiftool --ext avi --ext bmp --ext moi --ext mov --ext mpg --ext mts \
+    -m -overwrite_original_in_place -progress: -q \
+    -AllDates+="::$T" -SonyDateTime+="::$T" -IFD1:ModifyDate+="::$T" -FileModifyDate+="::$T" \
+    $DIRNAME

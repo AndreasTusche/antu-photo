@@ -33,7 +33,14 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-11 AnTu created
 
-T="${1//-/:} ${2//-/:}"
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
+T="${1//[-_.]/:} ${2//[-_.]/:}"
 DIRNAME="$( readlink -f "${3:-$(pwd)}" )"
 
 case "$#" in
@@ -42,7 +49,12 @@ case "$#" in
     *) echo "USAGE: ${0##*/} YYYY:MM:DD hh:mm:ss [FILENAME|DIRNAME]"; exit 1;;
 esac
 
-exiftool --ext avi --ext bmp --ext moi --ext mpg --ext mts \
+# Special handling for .mov QuickTime Videos
+exiftool -ext mov \
+	-m -overwrite_original_in_place -progress: -q -Quicktime:AllDates="$T" \
+    "$DIRNAME"
+
+exiftool --ext avi --ext bmp --ext moi --ext mov --ext mpg --ext mts \
     -m -overwrite_original_in_place -progress: -q \
     -AllDates="$T" -SonyDateTime="$T" -IFD1:ModifyDate="$T" -FileModifyDate="$T" \
-    $DIRNAME
+    "$DIRNAME"

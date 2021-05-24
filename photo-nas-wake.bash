@@ -24,27 +24,101 @@
 # ---------- ---- --------------------------------------------------------------
 # 2018-12-30 AnTu created
 
-# default config
-#export DEBUG=1
-export VERBOSE=1
-
-# --- nothing beyond this line needs configuration -----------------------------
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
-	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done
-fi
-if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # if sanity check failed
-	echo -e "\033[01;31mERROR:\033[00;31m Config File antu-photo.cfg was not found\033[0m" >&2 
-	exit 1
-fi
-
-(($PHOTO_LIB_DONE)) || source "$LIB_antu_photo"
-if [ "$PHOTO_LIB_DONE" != "1" ] ; then # if sanity check failed
-	echo -e "\033[01;31mERROR:\033[00;31m Library $LIB_antu_photo was not found\033[0m" >&2
-	exit 1
-fi
 
 
-# === MAIN =====================================================================
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
+
+################################################################################
+# config
+################################################################################
+
+DEBUG=${DEBUG:-1}                       # 0: do 1: do not print debug messages
+                                        # 2: bash verbose, 3: bash xtrace
+										# 9: bash noexec
+
+# ~~~ remove after development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global shell behaviour
+set -o nounset                          # Used variables MUST be initialized.
+set -o errtrace                         # Traces error in function & co.
+set -o functrace                        # Traps inherited by functions
+set -o pipefail                         # Exit on errors in pipe
+set +o posix                            # disable POSIX
+
+((DEBUG>1)) && set -o verbose; ((DEBUG<2)) && set +o verbose
+((DEBUG>2)) && set -o xtrace;  ((DEBUG<3)) && set +o xtrace
+((DEBUG>8)) && set -o noexec;  ((DEBUG<9)) && set +o noexec
+
+((DEBUG)) && VERBOSE=1 || VERBOSE=${VERBOSE:-$DEBUG}
+# ~~~ 
+
+((DEBUG)) && clear
+
+# preliminary print functions, may be replaced by those from lib_common.bash
+printDebug() { ((DEBUG)) && echo -e "$(date +'%Y-%m-%d %T') \033[1;35mDEBUG  :\033[0;35m ${@}\033[0m" ; }
+printError() {              echo -e "$(date +'%Y-%m-%d %T') \033[1;31mERROR  :\033[0;31m ${@}\033[0m" ; }
+
+
+
+#-------------------------------------------------------------------------------
+# path to this script
+#-------------------------------------------------------------------------------
+
+# --- see https://stackoverflow.com/questions/59895/
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+	DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+# ---
+
+readonly _THIS=$(basename "$SOURCE")   # the file name of this script 
+readonly _THIS_DIR="$DIR"              # the directory of this script
+unset DIR SOURCE
+printDebug "_THIS     = $_THIS"
+printDebug "_THIS_DIR = $_THIS_DIR"
+
+
+
+#-------------------------------------------------------------------------------
+# load config file
+#-------------------------------------------------------------------------------
+
+for d in "$_THIS_DIR" ~/.config/antu-photo ~ . ; do
+	source "$d/.antu-photo.cfg" 2>/dev/null || \
+	source "$d/antu-photo.cfg"  2>/dev/null
+done
+((ANTU_PHOTO_CFG_LOADED)) || printError "No config file antu-photo.cfg was not found" || exit 1
+
+
+
+#-------------------------------------------------------------------------------
+# load some function libraries
+#-------------------------------------------------------------------------------
+
+source "$_THIS_DIR/lib_common.bash"
+((common_lib_loaded)) || printError "Library $_THIS_DIR/lib_common.bash was not found." || exit 1
+
+source "$LIB_antu_photo"
+((photo_lib_loaded)) || printError "Library $LIB_antu_photo was not found." || exit 1
+
+
+
+#-------------------------------------------------------------------------------
+# check prerequisites
+#-------------------------------------------------------------------------------
+
+# TODO: check wakeonlan
+
+################################################################################
+# MAIN
+################################################################################
 
 # Check for NAS directory and wake up the NAS, if needed
 
@@ -57,7 +131,7 @@ if [[ ! -e "$NAS_MNT" ]]; then
 		# find the network's broadcast address from `ifconfig` output, e.g.
 		#	inet 192.168.42.42 netmask 0xffffff00
 		#	inet 192.168.42.42 netmask 0xffffff00 broadcast 192.168.42.255
-		if [[ "${NAS_BRD}" == "" ]]; then
+		if [[ "${NAS_BRD-}" == "" ]]; then
 			NAS_BRD=$( ifconfig | awk '
 				/broadcast/ { for (i=1;i<=NF;i++) if ($i~"broadcast") print $(i+1); exit } 
 				/^[ \t]+inet [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/ && ! /127.0.0.1/ { split($2,ip,"."); print ip[1]"."ip[2]"."ip[3]".255" }
@@ -67,9 +141,9 @@ if [[ ! -e "$NAS_MNT" ]]; then
 		# check if wakeonlan tool is installed
 		WAKEONLAN=$(which wakeonlan) || WAKEONLAN="/usr/local/bin/wakeonlan"
 		[ -e "$WAKEONLAN" ] || {
-			printError "wakeonlan not found."
-			echo "You may install 'wakeonlan' as follows:"
-			echo "    brew install wakeonlan"
+			printError  "wakeonlan not found."
+			printError2 "You may install 'wakeonlan' as follows:"
+			printError2 "    brew install wakeonlan"
 			exit 1
 		}
 		
@@ -93,6 +167,5 @@ if [[ ! -e "$NAS_MNT" ]]; then
 		printError "The Directory $NAS_MNT was not found on the NAS $NAS_URL after $NAS_SEC seconds."
 		exit 1
 	fi
-	
-	printToLog "The NAS directory $NAS_MNT is available."
 fi
+printToLog "The NAS directory $NAS_MNT is available."

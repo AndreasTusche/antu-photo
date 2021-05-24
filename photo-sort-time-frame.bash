@@ -15,6 +15,7 @@
 #   analouge series of photos was digitalised. If two pictures still end up in
 #   the same file-name, it will then be suffixed with a an incremental number:
 #   YYYYMMDD-hhmmss_ffff_n.xxx .
+# Todo: have two-digit sequence number
 #
 # OPTIONS
 #   INDIR  defaults to the present working directory
@@ -35,6 +36,13 @@
 # 2017-04-15 AnTu created
 # 2018-12-30 AnTu now checking for SequenceNumber
 # 2019-08-25 AnTu corrected syntax for handling of SequenceNumber
+
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
 
 DEBUG=1
 

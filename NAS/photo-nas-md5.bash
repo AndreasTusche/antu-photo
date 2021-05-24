@@ -15,12 +15,19 @@
 # ---------- ---- --------------------------------------------------------------
 # 2019-01-01 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	source "antu-photo.cfg" 2>/dev/null
 fi
 
-for p in ${RMT_ORG%/} ${RMT_EDT%/} ${RMT_SRC%/} ${RMT_SRC%/}_RAW ${RMT_SRC%/}_JPG ; do
+for p in ${LOC_ORG%/} ${LOC_EDT%/} ${LOC_SRC%/} ${LOC_SRC%/}_RAW ${LOC_SRC%/}_JPG ; do
 	if [[ -e ${p} ]]; then
 		echo "... md5sum for $p"
 		find $p -type f -not -path "*/@*" -not -path "*/[12][09][0-9][0-9]/*" -not -name ".DS_Store" -not -name "md5sum.txt" -exec md5sum {} \;	>${p%/}/md5sum.txt

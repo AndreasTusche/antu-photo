@@ -14,13 +14,20 @@
 # ---------- ---- --------------------------------------------------------------
 # 2019-01-01 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	source "antu-photo.cfg" 2>/dev/null
 fi
 
-cd "$RMT_PIC"
-cat "${RMT_SRC%/}/md5sum.txt" "${RMT_SRC%/}/"[12][90][0-9][0-9]"/md5sum.txt" "${RMT_ORG%/}/"[12][90][0-9][0-9]"/md5sum.txt" |#
+cd "$LOC_PIC"
+cat "${LOC_SRC%/}/md5sum.txt" "${LOC_SRC%/}/"[12][90][0-9][0-9]"/md5sum.txt" "${LOC_ORG%/}/"[12][90][0-9][0-9]"/md5sum.txt" |#
 grep -v "@" |#
 sort > all_md5sum.txt
 
@@ -45,7 +52,7 @@ $1==hash {
 	gsub(/\//, "\\/", efil)
 	print "if [[ -e  \"" prev "\" && -e \"" file "\" ]]; then"
 	print "    echo $(( ++i )) of $n:" file
-	print "    mv -v \"" file "\" \"'${RMT_RCY%/}/'\""
+	print "    mv -v \"" file "\" \"'${LOC_RCY%/}/'\""
 	print "    sed -i \"/" efil "/d\" all_md5sum.txt"
 	print "    sed -i \"/" efil "/d\" \"" ydir "md5sum.txt\""
 	print "fi"

@@ -1,9 +1,12 @@
 .DS_Store
 .git*
+*.code-workspace
+*.html
 .localized
 *.log
 $RECYCLE.BIN/
 Desktop.ini
 on_NAS/
+test.bash
 Thumbs.db
 TODO.md
