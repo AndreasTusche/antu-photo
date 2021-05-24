@@ -21,6 +21,13 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-19 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 echo '
 <?xml version="1.0" encoding="utf-8"?>
 <gpx version="1.0" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">

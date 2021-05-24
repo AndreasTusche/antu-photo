@@ -27,6 +27,13 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-17 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # config ( will be overwritten if config file exists )
 GPS_FMT="${0%/*}/gpx.fmt"
 GPS_LOG=gps.gpx #@ToDo: extract date info and have output to yyyymmdd.gpx

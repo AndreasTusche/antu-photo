@@ -11,6 +11,13 @@
 * 2017-01-01 AnTu created
 */
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 digraph workflow {
     graph [fontsize="8", xxlayout="dot"];
     // node  [shape="box"]

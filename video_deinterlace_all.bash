@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 myid=$( date +%Y%m%d%H%M%S )
 workorder=$( mktemp ./workorder_${myid}_XXX.bash )
 

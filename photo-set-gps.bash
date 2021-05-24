@@ -32,6 +32,13 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-17 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # config ( will be overwritten if config file exists )
 #DEBUG=1
 GPS_FMT="${0%/*}/gpx.fmt"

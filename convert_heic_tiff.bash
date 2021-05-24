@@ -11,6 +11,13 @@
 
 # 2020-11-22 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 convert_heic_tiff () {
     magick $1 -colorspace sRGB -compress zip -depth 8 -endian LSB ${1%.heic}.tiff
     exiftool -tagsfromfile $1 ${1%.heic}.tiff

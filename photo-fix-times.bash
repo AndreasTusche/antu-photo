@@ -31,6 +31,13 @@
 # ---------- ---- --------------------------------------------------------------
 # 2017-04-18 AnTu created
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # config
 DEBUG=0 # no debug output (0), somewhat verbose (1), more verbose (2)
 

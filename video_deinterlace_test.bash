@@ -16,6 +16,13 @@
 # ffmpeg -i top_l.mp4 -i top_r.mp4 -i bottom_l.mp4 -i bottom_r.mp4 -i audio.mp4 -filter_complex "[0:v][1:v]hstack[t];[2:v][3:v]hstack[b];[t][b]vstack[v]" -map "[v]" -map 4:a -c:a copy -shortest output.mp4
 
 
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
+
 DEBUG=1
 video="$1"          # input filename
 ext="mp4"           # output file extension

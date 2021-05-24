@@ -6,6 +6,13 @@
 # Stream #0:0(und): Video: dvvideo (dvcp / 0x70637664), yuv420p(smpte170m/bt470bg/bt709, bottom coded first (swapped)), 720x576 [SAR 16:15 DAR 4:3], <20Mb/s, SAR 59:54 DAR 295:216, 25 fps, 25 tbr, 25k tbn, 25 tbc (default)
 # Stream #0:2(und): Audio: pcm_s16le (lpcm / 0x6D63706C), 48000 Hz, stereo, s16, 1536 kb/s (default)
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 DEBUG=1
 video="$1"          # input filename
 ext="mp4"           # output file extension mp4 or m4v

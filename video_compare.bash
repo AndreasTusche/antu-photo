@@ -1,6 +1,13 @@
 #!/bin/bash
 # compare original video with 1 or 3 other videos.
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 DEBUG=1
 video="$1"          # input filename of original file
 ext="mp4"           # output file extension

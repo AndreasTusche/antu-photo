@@ -34,6 +34,13 @@
 # 2017-04-14 AnTu created
 # 2019-08-25 AnTu code clean-up
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # --- nothing beyond this line needs configuration -----------------------------
 if [ "$ANTU_PHOTO_CFG_DONE" != "1" ] ; then # read the configuration file(s)
 	for d in "${0%/*}" ~ . ; do source "$d/.antu-photo.cfg" 2>/dev/null || source "$d/antu-photo.cfg" 2>/dev/null; done

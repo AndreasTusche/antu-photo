@@ -21,6 +21,13 @@
 # 2015-11-05 AnTu initial version
 # 2019-08-25 AnTu use library functions
 
+
+#!#####################
+echo "needs rewrite" #!
+exit 1               #!
+#!#####################
+
+
 # default config
 export DEBUG=1
 export VERBOSE=1
