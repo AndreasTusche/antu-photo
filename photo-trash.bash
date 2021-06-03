@@ -23,7 +23,7 @@
 #	software. SIP would even block you from deleted files and accessing files
 #	from the Trash. 
 #	In the antu-photo.cfg configuration file, you either have to
-#	A) use a normal folder for these antu-photo scripts, or 
+#	A) use a normal folder instead of the recycle bin (.Trash), or 
 #	B) give the Terminal.app Full Disk permissions in the security settings, as
 #	   described here: https://apple.stackexchange.com/questions/376916/
 #
@@ -39,14 +39,6 @@
 # 2017-04-15 AnTu created
 # 2018-10-03 AnTu trash both, image and RAW
 # 2019-10-22 AnTu check external drives Trashes
-
-
-#!#####################
-echo "needs rewrite" #!
-exit 1               #!
-#!#####################
-
-
 
 ################################################################################
 # config
@@ -154,6 +146,9 @@ for rcyDir in ${DIR_RCY} /Volumes/*/.Trashes/* ; do
 
 	if [ -d "$rcyDir" ]; then
 		cd "$rcyDir"
+
+		ls >/dev/null # test if this trash is SIP protected
+		(($?)) && break
 
 		# for each RAW trash the corresponding image
 		find ${MAC:+-E} . -iregex ".*/${RGX_DSQ%/}\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
