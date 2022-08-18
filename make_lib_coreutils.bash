@@ -34,7 +34,12 @@ echo '#
 # '$(date +"%Y-%m-%d")' auto created
 ' >$l
 
-echo "((DEBUG)) && echo -n \"[ . \$BASH_SOURCE \""  >>$l
+echo "(( \${coreutils_lib_loaded:-0} )) && return 0     # load me only once" >>$l
+echo "((DEBUG)) && echo -n \"[ . \$BASH_SOURCE \"" >>$l
+echo "" >>$l
+echo "coreutils_DEVELOP=${coreutils_DEVELOP:-1}                              # special settings for while developing" >>$l
+echo "coreutils_MY_VERSION='\$Revision: $(date +"%y.%m%d") \$'      # version of this library" >>$l
+echo "" >>$l
 echo "# uncomment those commands you need" >>$l
 
 ls -1 $d | awk '
@@ -44,5 +49,5 @@ ls -1 $d | awk '
     }
 ' >>$l
 
-echo "((DEBUG)) && echo \"]\"" >>$l
+echo "coreutils_lib_loaded=1; ((DEBUG)) && echo \"]\"" >>$l
 echo "return 0" >>$l

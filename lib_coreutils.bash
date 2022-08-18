@@ -16,14 +16,19 @@
 #
 # AUTHOR
 #	@author     Andreas Tusche <antu-photo@andreas-tusche.de>
-#	@copyright  (c) 2021-2021, Andreas Tusche <www.andreas-tusche.de>
+#	@copyright  (c) 2021-2022, Andreas Tusche <www.andreas-tusche.de>
 #	@package    antu-photo
 #
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
-# 2021-05-16 auto created
+# 2022-08-18 auto created
 
+(( ${coreutils_lib_loaded:-0} )) && return 0     # load me only once
 ((DEBUG)) && echo -n "[ . $BASH_SOURCE "
+
+coreutils_DEVELOP=1                              # special settings for while developing
+coreutils_MY_VERSION='$Revision: 22.0818 $'      # version of this library
+
 # uncomment those commands you need
 # [()         { /usr/local/opt/coreutils/libexec/gnubin/[ "$@"; } ; GNU_[="/usr/local/opt/coreutils/libexec/gnubin/["
 # b2sum()     { /usr/local/opt/coreutils/libexec/gnubin/b2sum "$@"; } ; GNU_b2sum="/usr/local/opt/coreutils/libexec/gnubin/b2sum"
@@ -67,7 +72,7 @@ date()        { /usr/local/opt/coreutils/libexec/gnubin/date "$@"; } ; GNU_date=
 # link()      { /usr/local/opt/coreutils/libexec/gnubin/link "$@"; } ; GNU_link="/usr/local/opt/coreutils/libexec/gnubin/link"
 # ln()        { /usr/local/opt/coreutils/libexec/gnubin/ln "$@"; } ; GNU_ln="/usr/local/opt/coreutils/libexec/gnubin/ln"
 # logname()   { /usr/local/opt/coreutils/libexec/gnubin/logname "$@"; } ; GNU_logname="/usr/local/opt/coreutils/libexec/gnubin/logname"
-# ls()        { /usr/local/opt/coreutils/libexec/gnubin/ls "$@"; } ; GNU_ls="/usr/local/opt/coreutils/libexec/gnubin/ls"
+ls()          { /usr/local/opt/coreutils/libexec/gnubin/ls "$@"; } ; GNU_ls="/usr/local/opt/coreutils/libexec/gnubin/ls"
 # md5sum()    { /usr/local/opt/coreutils/libexec/gnubin/md5sum "$@"; } ; GNU_md5sum="/usr/local/opt/coreutils/libexec/gnubin/md5sum"
 # mkdir()     { /usr/local/opt/coreutils/libexec/gnubin/mkdir "$@"; } ; GNU_mkdir="/usr/local/opt/coreutils/libexec/gnubin/mkdir"
 # mkfifo()    { /usr/local/opt/coreutils/libexec/gnubin/mkfifo "$@"; } ; GNU_mkfifo="/usr/local/opt/coreutils/libexec/gnubin/mkfifo"
@@ -131,5 +136,5 @@ mv()          { /usr/local/opt/coreutils/libexec/gnubin/mv "$@"; } ; GNU_mv="/us
 # who()       { /usr/local/opt/coreutils/libexec/gnubin/who "$@"; } ; GNU_who="/usr/local/opt/coreutils/libexec/gnubin/who"
 # whoami()    { /usr/local/opt/coreutils/libexec/gnubin/whoami "$@"; } ; GNU_whoami="/usr/local/opt/coreutils/libexec/gnubin/whoami"
 # yes()       { /usr/local/opt/coreutils/libexec/gnubin/yes "$@"; } ; GNU_yes="/usr/local/opt/coreutils/libexec/gnubin/yes"
-((DEBUG)) && echo "]"
+coreutils_lib_loaded=1; ((DEBUG)) && echo "]"
 return 0
