@@ -3,31 +3,33 @@
 ################################################################################
 #
 # NAME
-#   lib_coreutils.bash - source this to avoid having all coreutils in the PATH
+#   lib_coreutils.bash - source this when you do not want coreutils in the PATH
 #
 # SYNOPSIS
 #   source lib_coreutils.bash
 #
 # DESCRIPTION
-#	This library replaces command calls by function calls to the coreutils in
-#   /usr/local/opt/coreutils/libexec/gnubin
+#	This library replaces some command calls by function calls to the coreutils
+#   version 9.2 in /usr/local/opt/coreutils/libexec/gnubin
 #
 #   To recreate this library, run make_lib_coreutils.bash
 #
 # AUTHOR
-#	@author     Andreas Tusche <antu-photo@andreas-tusche.de>
-#	@copyright  (c) 2021-2022, Andreas Tusche <www.andreas-tusche.de>
-#	@package    antu-photo
+#	@author     Andreas Tusche <bash_libraries@andreas-tusche.de>
+#	@copyright  (c) 2021-2023, Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu::bash_libraries
+#	@version    $Revision: 23.9.2 $
+#	@(#) $Id: lib_common.sh,v 23.9.2 2023/04/10 AnTu Exp $
 #
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
-# 2022-08-18 auto created
+# 2023-04-10 auto created
 
 (( ${coreutils_lib_loaded:-0} )) && return 0     # load me only once
 ((DEBUG)) && echo -n "[ . $BASH_SOURCE "
 
 coreutils_DEVELOP=1                              # special settings for while developing
-coreutils_MY_VERSION='$Revision: 22.0818 $'      # version of this library
+coreutils_MY_VERSION='$Revision: 23.9.2 $'       # version of this library
 
 # uncomment those commands you need
 # [()         { /usr/local/opt/coreutils/libexec/gnubin/[ "$@"; } ; GNU_[="/usr/local/opt/coreutils/libexec/gnubin/["
