@@ -5,21 +5,26 @@
 #	antu-sortphotos.bash - move photos and videos to daily folders
 #
 # SYNOPSIS
-#	antu-sortphotos.bash [-2|--stage2]
+#	antu-sortphotos.bash [-2|--stage2] [OPTIONS]
 #
 # DESCRIPTION
 #	A quick wrapper around the 'exiftool' tool for my preferred directory
 #	strucure. Everything starts with the INBOX. It moves, in this order:
+#
 #	- movies        from     ~/Pictures/INBOX/ and subfolders
-#	                to       ~/Movies/YYYY/YYYY-MM-DD/
+#	                to       ~/Movies/REVIEW/YYYY/YYYY-MM-DD/
+#
 #	- movies        from     ~/Movies/
-#	                to       ~/Movies/YYYY/YYYY-MM-DD/
+#	                to       ~/Movies/REVIEW/YYYY/YYYY-MM-DD/
+#
 #	- raw images    from     ~/Pictures/INBOX/ and subfolders
-#?	                to       ~/Pictures/RAW/YYYY/YYYY-MM-DD/
+#	                to       ~/Pictures/REVIEW/RAW/YYYY/YYYY-MM-DD/
+#
 #	- edited images from     ~/Pictures/INBOX/ and subfolders
-#	                to       ~/Pictures/edit/YYYY/YYYY-MM-DD/
+#	                to       ~/Pictures/EDIT/YYYY/YYYY-MM-DD/
+#
 #	- photos        from     ~/Pictures/INBOX/ and subfolders
-#?	                to       ~/Pictures/sorted/YYYY/YYYY-MM-DD/
+#	                to       ~/Pictures/REVIEW/YYYY/YYYY-MM-DD/
 #
 #	Above default direcory names may be overwritten by the antu-photo.cfg file.
 #
@@ -44,34 +49,73 @@
 #	Derived or edited images are recognised by their file extension:
 #		.afphoto .bmp .eps .pdf .psd .tif .tiff
 #
-#?	All files are checked, if their EXIF timestamps had been corrupted, and are
-#?	fixed, if necessary. It is expected that all timestamps are either identical
-#?	or increasing in this order:
-#?		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
-#?		≤ FileInodeChangeDate ≤ FileAccessDate
+#	All files are checked, if their EXIF timestamps had been corrupted, and are
+#	fixed, if necessary. It is expected that all timestamps are either identical
+#	or increasing in this order:
+#		CreateDate ≤ DateTimeOriginal ≤ ModifyDate ≤ FileModifyDate
+#		≤ FileInodeChangeDate ≤ FileAccessDate
 #
 #	Images and RAW images are renamed to YYYYMMDD-hhmmss.xxx, based on their
 #	CreateDate. If two pictures were taken at the same second, the filename will
 #	be suffixed with an incremental sequence number: YYYYMMDD-hhmmss_nn.xxx .
 #
-#?	In a second invocation, with option '--stage2', pictures will be resorted
-#?	- photos        from     ~/Pictures/sorted/ and subfolders
-#?	                to       ~/Pictures/YYYY/YYYY-MM-DD/
+#	In a second invocation, with option '--stage2', pictures will be resorted
+#
+#	- raw images    from     ~/Pictures/REVIEW/RAW/YYYY/YYYY-MM-DD/
+#	                to       ~/Pictures/ORIGINAL/YYYY/YYYY-MM-DD/
+#
+#	- photos        from     ~/Pictures/REVIEW/YYYY/YYYY-MM-DD/
+#	                to       ~/Pictures/YYYY/YYYY-MM-DD/
+#	                or to    ~/Pictures/ORIGINAL/YYYY/YYYY-MM-DD/
+#	                         if no original raw photo existed
+#
+#	Above default direcory names may be overwritten by the antu-photo.cfg file.
+#
+# OPTIONS
+#	-2 | --stage2
+#		Sort reviewed photos to final destination
+#
+#	--debug
+#		Output verbose and extra debugging information to stderr.
+#		For more debugging, consider invoking this script via
+#		DEBUG=[12349] antu-sortphotos.bash > debugfile.txt 2>&1
+#
+#	-h, --help
+#		Display this help and exit.
+#
+#	--usage
+#		Display a short usage message and exit. This is the default if no
+#		argument or option was given.
+#
+#	-v, --verbose
+#		Be verbose on the output.
+#
+#	-V, --version
+#		Output version information.
 #
 # FILES
 #	Uses exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 #
+# USES
+#	lib_common.bash   - often used functions
+#	lib_exifbash      - functions for calling the exiftools
+#	lib_photo.bash    - the main function to sort photos
+#
+# DIAGNOSTICS
+#	The exit status is 0 if a valid argument was given and the script
+#	ran without problems else the exit status is >0.
+#
 # BUGS
 #	- The exiftool may bail out on non-ascii characters in the filename.
-#?	- Companion files from 3rd party software (sidecar files) are not renamed
-#?	  and may loose their intended function.
+#	- Companion files from 3rd party software (sidecar files) are not renamed
+#	  and may loose their intended function.
 #
 # AUTHOR
 #	@author     Andreas Tusche    <antu-photo@andreas-tusche.de>
-#	@copyright  (c) 2017-2021, Andreas Tusche <www.andreas-tusche.de>
+#	@copyright  (c) 2015-2023, Andreas Tusche <www.andreas-tusche.de>
 #	@package    antu-photo
-#	@version    $Revision: 0.0 $
-#	@(#) $Id: . Exp $
+#	@version    $Revision: 4.2 $
+#   @(#) $Id: antu-sortphotos.bash ,v 4.2 2023/04/10 AnTu Exp $
 #
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
@@ -82,11 +126,16 @@
 # 2019-08-02 AnTu check for pictures (JPG, etc.) wich are the only originals
 # 2019-08-24 AnTu have two digit counter for backup-type file names
 
+
+
 ################################################################################
 # config
 ################################################################################
 
-# ToDo: correctly handle stages
+#-------------------------------------------------------------------------------
+# Stage 1 sorts for review, stage 2 sorts to final destination
+#-------------------------------------------------------------------------------
+
 STAGE_ONE=1
 STAGE_TWO=0
 
@@ -96,6 +145,7 @@ STAGE_TWO=0
 
 DEBUG=${DEBUG-''}						# 0: do not 1: do print debug messages
                                         # 2: bash verbose, 3: bash xtrace
+										# 4: exit when any command fails
 										# 9: bash noexec
 
 set -o nounset                          # Used variables MUST be initialized.
@@ -104,10 +154,16 @@ set -o functrace                        # Traps inherited by functions
 set -o pipefail                         # Exit on errors in pipe
 set +o posix                            # disable POSIX
 
+# keep track of the last executed command and echo an error message before exiting
+TRAP_CMD=''
+trap 'TRAP_LAST_CMD=$TRAP_CMD; TRAP_CMD=$BASH_COMMAND' DEBUG
+trap 'printError "\"${TRAP_LAST_CMD}\" command failed with exit code $?."' EXIT
+
 ((DEBUG==0)) && DEBUG=
-((DEBUG>1)) && set -o verbose; ((DEBUG<2)) && set +o verbose
-((DEBUG>2)) && set -o xtrace;  ((DEBUG<3)) && set +o xtrace
-((DEBUG>8)) && set -o noexec;  ((DEBUG<9)) && set +o noexec
+((DEBUG>1))  && set -o verbose; ((DEBUG<2)) && set +o verbose
+((DEBUG>2))  && set -o xtrace;  ((DEBUG<3)) && set +o xtrace
+((DEBUG>3))  && set -e;         ((DEBUG<4)) && set +e
+((DEBUG>8))  && set -o noexec;  ((DEBUG<9)) && set +o noexec
 
 ((DEBUG)) && VERBOSE=1 || VERBOSE=${VERBOSE:-$DEBUG}
 ((DEBUG)) && clear && banner -w 32 $(date +%T)
@@ -124,9 +180,9 @@ if ! command -v realpath &>/dev/null ; then realpath() { readlink -- "$1" ; } ; 
 # path to this script - needs GNU `realpath` installed
 #-------------------------------------------------------------------------------
 
-#@Todo: Use source lib_coreutils.bash only during development
-#@Todo: else photo_check_dependencies() adds coreutils to the PATH
-source "$( dirname $( realpath "${BASH_SOURCE[0]}" ) )/lib_coreutils.bash" || die 53 "Library lib_coreutils.bash was not found."
+#// Todo: Use source lib_coreutils.bash only during development
+#// Todo: else photo_check_dependencies() adds coreutils to the PATH
+#source "$( dirname $( realpath "${BASH_SOURCE[0]}" ) )/lib_coreutils.bash" || die 53 "Library lib_coreutils.bash was not found."
 
 readonly _THIS_SCRIPT="$( realpath "${BASH_SOURCE[0]}" )" # full path to script
 readonly _THIS=$( basename "$_THIS_SCRIPT" )              # script name
@@ -153,29 +209,80 @@ source "$_THIS_DIR/lib_photo.bash"  && ((photo_lib_loaded))  || die 53 "Library 
 #-------------------------------------------------------------------------------
 
 for d in "$_THIS_DIR" ~/.config/antu-photo ~ . ; do
-	source "$d/.antu-photo.cfg" 2>/dev/null || \
-	source "$d/antu-photo.cfg"  2>/dev/null
+	if [[   -f "$d/.antu-photo.cfg" ]]; then
+		source "$d/.antu-photo.cfg" 2>/dev/null
+	elif [[ -f "$d/antu-photo.cfg" ]]; then
+		source "$d/antu-photo.cfg"  2>/dev/null
+	fi
 done
 ((ANTU_PHOTO_CFG_LOADED)) || die 51 "No config file antu-photo.cfg found"
 
+# ToDo: check if this can be moved below the command line arguments
+# ToDo: then allow a cmd line argument to read a different config file
 photo_config_directories_wrk
 photo_config_directories_nas
 photo_config_directories_rmt
 
 
 
-#-------------------------------------------------------------------------------
-# check directories
-#-------------------------------------------------------------------------------
+###############################################################################
+# handle multiple command line arguments
+###############################################################################
 
-# If NAS was not mounted, then use a local logfile
-photo_NASisMounted || LOGFILE="${DIR_PIC%/}/.antu-photo.log"
-
-photo_check_dependencies #@ToDo: also set PATH to GNU coreutils there
-photo_check_directories
-photo_check_files
-
-((ROTATE_LOGFILE)) && rotateLog $LOGFILE $ROTATE_LOGFILE
+for ((n=1; $n <= $# ; n++)) ; do
+	option="${!n}"            # get the $n.th argument
+	case "$option" in
+	--)                       # end of parsing
+		break
+		;;
+	-[A-Za-z0-9][A-Za-z0-9]*) # split combined options
+		_o=""
+		for (( i=1; $i < ${#option} ; i++ )) ; do
+			_o="$_o -${option:$i:1}"
+		done
+		set - $_o ${@:$((n+1))}
+		n=0
+		;;
+	-2|--stage2)                       # stage 2
+		STAGE_ONE=0
+		STAGE_TWO=1
+		;;
+	--debug)                  # set mode to output debug info
+		DEBUG=1
+		printDebug "${0##*/} $@ "
+		;;
+	-h | --help)             # call Help function and exit successfully
+		printHelp
+		trap - INT QUIT TERM EXIT
+		exit $ERR_NOERR
+		;;
+	--usage)                  # call Usage function and exit successfully
+		printUsage
+		trap - INT QUIT TERM EXIT
+		exit $ERR_NOERR
+		;;
+	-v | --verbose)           # activate verbose output
+		VERBOSE=1
+		;;
+	-V | --version)           # display version number
+		awk '/@version/ {print $4; exit}' "${0##*/}"
+		trap - INT QUIT TERM EXIT
+		exit $ERR_NOERR
+		;;
+	-*)                       # test for unknown options
+		echo -e "\e[01;31mERROR:\e[00;31m Unknown option '$option'. \n($@)\e[0m" >&2
+		printUsage
+		trap - INT QUIT TERM EXIT
+		exit $ERR_UNKNOWN_OPTION
+		;;
+	*)                              # ... and all the rest
+		echo -e "\e[01;31mERROR:\e[00;31m Unknown argument '$option'.\e[0m" >&2
+		printUsage
+		trap - INT QUIT TERM EXIT
+		exit $ERR_UNKNOWN_ARGUMENT
+		;;
+	esac
+done
 
 
 
@@ -183,87 +290,109 @@ photo_check_files
 # MAIN
 ################################################################################
 
+# If NAS was not mounted, then use a local logfile
+photo_NASisMounted || LOGFILE="${DIR_PIC%/}/.antu-photo.log"
+((ROTATE_LOGFILE)) && rotateLog $LOGFILE $ROTATE_LOGFILE
+
 printToLog '-------------------------------------------------------------------'
 printToLog "$_THIS started by ${USER:-${USERNAME:-${LOGNAME}}}"
+
+
+
+#-------------------------------------------------------------------------------
+# check directories
+#-------------------------------------------------------------------------------
+
+photo_check_dependencies
+photo_check_directories
+photo_check_files
 
 ((CREATE_MISSING_DIRECTORIES)) && photo_create_directories
 
 
+
+#-------------------------------------------------------------------------------
+# stage 1
+#-------------------------------------------------------------------------------
+
 if ((STAGE_ONE)) ; then #@ ========================================= STAGE 1 ===
-# sort files from INBOX to REVIEW
+	printDebug "STAGE 1 - sort photos for review"
 
-if [[ -d "$DIR_SRC" ]] ; then
-	cd $( realpath "$DIR_SRC" )
-	printToLog "Work directory (in-box): $DIR_SRC"
-else
-	die $ERR_DIR_NOT_FOUND "cd $DIR_SRC: No such file or directory."
-fi
+	if [[ -d "$DIR_SRC" ]] ; then
+		cd $( realpath "$DIR_SRC" )
+		printToLog "Work directory (in-box): $DIR_SRC"
+	else
+		die $ERR_DIR_NOT_FOUND "cd $DIR_SRC: No such file or directory."
+	fi
 
-# --- move away unwanted files
+	# --- move away unwanted files
 
-printVerbose "Next step is to trash duplicates and move unwanted files."
-(($DEBUG)) && pause - "Trash duplicates and move unwanted files"
-photo_trash_duplicates .
-photo_align_backup_file_names
-photo_move . "$DIR_ERR" "$RGX_ERR"          "Find Error" || die $ERR_NOT_WRITEABLE "Solve above problems before trying again."
-photo_move . "$DIR_ERR" "$RGX_BAD"          "Move Unwanted" # move unwanted files out of the way
-photo_trash_duplicates "$DIR_ERR"
-
-
-# --- heavy lifting START ---
-
-photo_sort . "$MOV_REV" "$RGX_MOV"          "Sort Movies"   # move and rename video clips amd movies
-photo_sort . "$DIR_RAW" "$RGX_RAW|$RGX_ARC" "Sort RAW"      # move and rename RAW and archive files
-photo_sort . "$DIR_EDT" "$RGX_EDT"          "Sort EDIT"     # move and rename edited files
-photo_sort . "$DIR_REV" "$RGX_IMG"          "Sort Images"   # move and rename all remaining image files
-
-# --- heavy lifting END ---
+	printVerbose "Next step is to trash duplicates and move unwanted files."
+	(($DEBUG)) && pause - "Trash duplicates and move unwanted files"
+	photo_trash_duplicates .
+	photo_align_backup_file_names
+	photo_move . "$DIR_ERR" "$RGX_ERR"          "Find Error" || die $ERR_NOT_WRITEABLE "Solve above problems before trying again."
+	photo_move . "$DIR_ERR" "$RGX_BAD"          "Move Unwanted" # move unwanted files out of the way
+	photo_trash_duplicates "$DIR_ERR"
 
 
-# per destination directory, check for duplicates
-printVerbose "Next step is to remove duplicates from target directories."
-(($DEBUG)) && pause - "Remove duplicates from target directories"
+	# --- heavy lifting START ---
 
-pushd "$DIR_RAW" >/dev/null
-for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
-	[ -d "$d" ] || break
-	photo_trash_duplicates "${DIR_ORG%/}/$d" "${DIR_RAW%/}/$d"
-done
-popd >/dev/null
+	photo_sort . "$MOV_REV" "$RGX_MOV"          "Sort Movies"   # move and rename video clips amd movies
+	photo_sort . "$DIR_RAW" "$RGX_RAW|$RGX_ARC" "Sort RAW"      # move and rename RAW and archive files
+	photo_sort . "$DIR_EDT" "$RGX_EDT"          "Sort EDIT"     # move and rename edited files
+	photo_sort . "$DIR_REV" "$RGX_IMG"          "Sort Images"   # move and rename all remaining image files
 
-pushd "$DIR_REV" >/dev/null
-for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
-	[ -d "$d" ] || break
-	photo_trash_duplicates "${DIR_PIC%/}/$d" "${DIR_REV%/}/$d"
-done
-popd >/dev/null
+	# --- heavy lifting END ---
 
-printInfo "Done - remaining files in $DIR_SRC"
-find $( realpath "$DIR_SRC" ) -type f ! -name .DS_Store
+	# ToDo: Once the sidecar files are renamed, check if their content needs to be
+	# ToDo: adjusted. DxO files are in JSON format and contain the source RAW and
+	# ToDo: the destination JPG filenames. Try 'jq'.
 
-# @Todo: in stage 2 use DIR_ORG instead of DIR_RAW 
-# @Todo: in stage 2 use DIR_PIC instead of DIR_REV
+	# per destination directory, check for duplicates
+	printVerbose "Next step is to remove duplicates from target directories."
+	(($DEBUG)) && pause - "Remove duplicates from target directories"
+
+	pushd "$DIR_RAW" >/dev/null
+	for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
+		[ -d "$d" ] || break
+		photo_trash_duplicates "${DIR_ORG%/}/$d" "${DIR_RAW%/}/$d"
+	done
+	popd >/dev/null
+
+	pushd "$DIR_REV" >/dev/null
+	for d in $( ls -d [12]*/[12]* 2>/dev/null ) ; do
+		[ -d "$d" ] || break
+		photo_trash_duplicates "${DIR_PIC%/}/$d" "${DIR_REV%/}/$d"
+	done
+	popd >/dev/null
+
+	# remove now empty deirectories from DIR_SRC
+	find "$DIR_SRC" -type f -name .DS_Store -delete
+	find "$DIR_SRC" -type d -empty -delete
+
+	printInfo "Done - remaining files in $DIR_SRC"
+	find $( realpath "$DIR_SRC" ) -type f ! -name .DS_Store
 
 fi # if ((STAGE_ONE)) #@ ======================================= END STAGE 1 ===
 
-#!##########
-DEBUG=1
-VERBOSE=1
-#!##########
+
+
+#-------------------------------------------------------------------------------
+# stage 2
+#-------------------------------------------------------------------------------
 
 if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
-# handle pictures which are actually also originals
-
-# ToDo: move from REVIEW/RAW   to ORIGINAL
-# ToDo: move from REVIEW/YYYY* to ORIGINAL, if no better RAW is available
-# ToDo: move, don't create new duplicates
+	printDebug "STAGE 2 - sort reviewed photos to final destination"
 
 	# preparation for photo_parse_filename()
     enum -1 DIRECTORY BASENAME TRUNK TRUNK1 EXTENSION EXTENSION1 SEQUENCE BACKUP YEAR MONTH DAY HOUR MINUTE SECOND CENTISECOND 
 
 	printInfo "searching for pictures which are actually also originals ..."
 
-	# I. Find original raw files and copy to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
+
+
+	# I. Find original raw files in REVIEW/RAW and copy to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1.     if identical remove current, keep destination
 		# 1.2.     if not identical move current to ERROR
@@ -272,13 +401,14 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 		# 2.3.     current is RAW, destination is not, exchange files
 		# 3.   If destination does not exist, move current there
 
-	printInfo "... find original raw files and copy to RAW"
-	(($DEBUG)) && pause
+	printVerbose "Next step is to find reviewed RAW files and copy to ORIGINAL."
+	(($DEBUG)) && pause - "find reviewed RAW files and copy to ORIGINAL"
+	printInfo "... skipping Archive files, if any"
 
-	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+	find ${MAC:+-E} "${DIR_RAW%/}" -iregex "${DIR_RAW%/}/${RGX_DIR}\.(${RGX_RAW})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		photo_parse_filename "$file"
 		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
-		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+		ddir="${DIR_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 
 		# 1.   If destination exists and has same filename, compare files
 		if [[ -e "${ddir%/}/${bn}" ]] ; then
@@ -306,17 +436,17 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 					mv "${file}" "${ddir}"
 				fi
 			else
-				# 3.   If destination does not exist, copy current there
-				printToLog "${file} copied to ${ddir}"
+				# 3.   If destination does not exist, move current there
+				printToLog "${file} moved to ${ddir}"
 				mkdir -p "${ddir}"
-				cp "${file}" "${ddir}"
+				mv "${file}" "${ddir}"
 			fi
 		fi
 	done
 
 
 
-	# II. Find other original image files and move to RAW/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
+	# II. Find other original image files and move to ORIGINAL/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
@@ -326,13 +456,13 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 		# 3.   If destination does not exist, move current there
 		# ---
 
-	printInfo "... find other original image files and copy to RAW"
-	(($DEBUG)) && pause
+	printVerbose "Next step is to find other original image files and copy to ORIGINAL"
+	(($DEBUG)) && pause - "find other original image files and copy to ORIGINAL"
 
 	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		photo_parse_filename "$file"
 		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
-		ddir="${DIR_RAW%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+		ddir="${DIR_ORG%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 
 		# 1.   If destination exists and has same filename, compare files
 		if [[ -e "${ddir%/}/${bn}" ]] ; then
@@ -368,18 +498,56 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 
 
 
-	# III. Find other image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
+	# III. Find other image files and move to Pictures/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 		# 1.   If destination exists and has same filename, compare files
 		# 1.1. if identical remove current, keep destination
 		# 1.2. if not identical move current to ERROR
 		# 2.   If destination does not exist, move current there
 
-	printInfo "... find other image files and move to EDIT"
-	(($DEBUG)) && pause
+	printVerbose "Next step is to find other image files and move to Pictures"
+	(($DEBUG)) && pause - "find other image files and move to Pictures"
+
+	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_IMG})" -type f -print0 | while IFS= read -r -d $'\0' file; do
+		photo_parse_filename "$file"
+		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		# Note, we do not move to EDIT folder (as that is for photoshop etc.)
+		ddir="${DIR_PIC%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
+
+		# 1.   If destination exists and has same filename, compare files
+		if [[ -e "${ddir%/}/${bn}" ]] ; then
+			cmp --silent "$file" "${ddir%/}/${bn}"
+			if [ $? == 0 ] ; then
+				# 1.1. if identical remove current, keep destination
+				printToLog "${bn} identical with file in ${ddir}, removing it"
+				mv --backup=t -f "${file}" "${DIR_RCY%/}/"
+			else
+				# 1.2. if not identical move current to ERROR
+				printToLog "${bn} has same filename in ${ddir} but is not identical, moving to ${DIR_ERR%/}"
+				mv --backup=t -f "${file}" "${DIR_ERR%/}/"
+			fi
+		else
+			# 2.   If destination does not exist, move current there
+			printToLog "${file} moved to ${ddir}"
+			mkdir -p "${ddir}"
+			mv "${file}" "${ddir}"
+		fi
+	done
+
+
+	
+	# IV. Find edited image files and move to EDIT/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
+		# 1.   If destination exists and has same filename, compare files
+		# 1.1. if identical remove current, keep destination
+		# 1.2. if not identical move current to ERROR
+		# 2.   If destination does not exist, move current there
+
+	printVerbose "Next step is to find edited image files and move to EDIT"
+	(($DEBUG)) && pause - "find edited image files and move to EDIT"
 
 	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_EDT})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		photo_parse_filename "$file"
 		read dn bn tr t1 ex e1 sq bu yy mm dd hh mi ss cs <<< ${REPLY[*]}
+		# Note, we do not move to EDIT folder (as that is for photoshop etc.)
 		ddir="${DIR_EDT%/}/${yy}/${yy}-${mm}-${dd}/" # destination directory
 
 		# 1.   If destination exists and has same filename, compare files
@@ -401,9 +569,8 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 			mv "${file}" "${ddir}"
 		fi
 	done
-	
-	# Note: on stage 1, skipping step IV (archive files)
-	printInfo "... skipping Archive files, if any"
+
+
 
 	# V. Find SideCar files and move to EDIT/SIDECAR/yyyy/yyyy-mm-dd/yyyymmdd-hhmmss[_ff].ext
 		# 1.   If destination exists and has same filename, compare files (md5?)
@@ -411,8 +578,8 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 		# 1.2. if not identical move current to ERROR
 		# 2.   If destination does not exist, move current there
 
-	printInfo "... find SideCar files and move to EDIT/SIDECAR"
-	(($DEBUG)) && pause
+	printVerbose "Next step is to find SideCar files and move to EDIT/SIDECAR"
+	(($DEBUG)) && pause - "find SideCar files and move to EDIT/SIDECAR"
 
 	find ${MAC:+-E} "${DIR_REV%/}" -iregex "${DIR_REV%/}/${RGX_DIR}\.(${RGX_CAR})" -type f -print0 | while IFS= read -r -d $'\0' file; do
 		photo_parse_filename "$file"
@@ -439,6 +606,15 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 		fi
 	done
 
+
+
+	# remove now empty deirectories from DIR_REV
+	find "$DIR_REV" -type f -name .DS_Store -delete
+	find "$DIR_REV" -type d -empty -delete
+
+	printInfo "Done - remaining files in $DIR_REV"
+	find $( realpath "$DIR_REV" ) -type f ! -name .DS_Store
+
 fi # if ((STAGE_TWO)) #@ ======================================= END STAGE 2 ===
 
 
@@ -447,14 +623,14 @@ fi # if ((STAGE_TWO)) #@ ======================================= END STAGE 2 ===
 #  echo "... extracting GPS coordinates"
 #  # assuming we have pictures from after the year 2000
 #  for d in ${DIR_PIC%/}/2*; do
-#   for dd in "${d%/}"/2*; do
-#    if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
-#        $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
-#     if [[ ! -s "${dd%/}/${GPS_LOG}" ]]; then
-#      rm "${dd%/}/${GPS_LOG}"
-#     fi
-#    fi
-#   done
+#	for dd in "${d%/}"/2*; do
+#	 if [[ ! -e "${dd%/}/${GPS_LOG}" ]]; then
+#	     $CMD_extractgps "${dd}"  >"${dd%/}/${GPS_LOG}"
+#	  if [[ ! -s "${dd%/}/${GPS_LOG}" ]]; then
+#	   rm "${dd%/}/${GPS_LOG}"
+#	  fi
+#	 fi
+#	done
 #  done
 # fi
 
@@ -464,4 +640,5 @@ fi # if ((STAGE_TWO)) #@ ======================================= END STAGE 2 ===
 # finally clean up
 rm -f "$DIR_TMP/.DS_Store"
 rm -d "$DIR_TMP"
+trap - INT QUIT TERM EXIT
 printInfo "=== done"
