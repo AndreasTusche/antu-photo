@@ -1,26 +1,14 @@
 #
 # -*- mode: bash; tab-width: 4 -*-
 ################################################################################
-# lib_common - Library of common functions
-#
-# @author     Andreas Tusche <lib_common@andreas-tusche.de>
-# @copyright  Andreas Tusche <www.andreas-tusche.de>
-# @package    antu::bash_libraries
-# @version    $Revision: 7.2.12 $
-# @(#) $Id: lib_common.sh,v 7.2 2020/06/07 AnTu Exp $
-#
-#===============================================================================
 #
 # NAME
-#
 #	lib_common - a bash functions library
 #
 # SYNOPSIS
-#
 #	source lib_common.sh [--help]
 #
 # DESCRIPTION
-#
 #	This library provides a collection of functions that are common to a
 #	number of scripts and don't fit into one of the other libraries.
 #
@@ -46,11 +34,13 @@
 #	printError         - print coloured error message 
 #	printError2        - print indented coloured error message
 #	printFolded        - print text with left or right margin
+#   printHelp          - extract help text from first comment block of script
 #	printInfo          - print coloured message
 #	printInfo2         - print indented coloured message 
 #	printStep          - print progress information and end that line with "done"
 #	printTemplate      - print a template string with variables replaced by values
 #	printTemplateFile  - print a template file with variables replaced by values
+#   printUsage         - extract Synopsis text from first comment block of script
 #	printVerbose       - print coloured message, if in VERBOSE mode
 #	printVerbose2      - print indented coloured message, if in VERBOSE mode
 #	printWarning       - print coloured warning message to stderr
@@ -59,8 +49,11 @@
 #	strRLE             - run-length encode string
 #
 # AUTHOR
-#	Andreas Tusche <www.andreas-tusche.de>
-#===============================================================================
+#	@author     Andreas Tusche <bash_libraries@andreas-tusche.de>
+#	@copyright  2008-2023 Andreas Tusche <www.andreas-tusche.de>
+#	@package    antu::bash_libraries
+#	@version    $Revision: 9.0.15 $
+#	@(#) $Id: lib_common.sh,v 9.0 2023/04/10 AnTu Exp $
 #
 # when       who  what
 # ---------- ---- --------------------------------------------------------------
@@ -77,11 +70,8 @@
 # 2014-11-13 AnTu new log*() functions
 # 2020-06-07 AnTu new printFolded(), now called by all other print*()
 # 2020-12-04 AnTu new check*(), is*() functions, better debugging options
-################################################################################
-
-DEBUG=${DEBUG-''}						# 0: do not 1: do print debug messages
-                                        # 2: bash verbose, 3: bash xtrace
-										# 9: bash noexec
+# 2021-11-07 AnTu new printHelp(), printUsage()
+# 2023-04-10 AnTu corrected pause(), printHelp(), printUsage()
 
 (( ${common_lib_loaded:-0} )) && return 0 # load me only once
 ((DEBUG)) && echo -n "[ . $BASH_SOURCE "
@@ -92,39 +82,13 @@ DEBUG=${DEBUG-''}						# 0: do not 1: do print debug messages
 
 common_DEVELOP=1                        # special settings for while developing
 common_ERROR_TRAP=0                     # dump function calls in case of error
-common_MY_VERSION='$Revision: 7.2.12 $' # version of this library
-
-
-
-################################################################################
-# all arguments are handled by the calling script, but in case help is needed
-################################################################################
-
-case "${@:-}" in
-	--help)
-		awk 'BEGIN{l=""} /^# NAME/,/^#===/ {print l; if (/^#===/) exit; sub(/^# ?/,"");gsub(/\t/,"    ");l=$0}' "$BASH_SOURCE"
-		exit 0
-		;;
-esac
+common_MY_VERSION='$Revision: 9.0.15 $' # version of this library
 
 
 
 ################################################################################
 # global variables
 ################################################################################
-
-# Global shell behaviour
-set -o nounset                          # Used variables MUST be initialized.
-set -o errtrace                         # Traces error in function & co.
-set -o functrace                        # Traps inherited by functions
-set -o pipefail                         # Exit on errors in pipe
-set +o posix                            # disable POSIX
-
-((DEBUG>1)) && set -o verbose; ((DEBUG<2)) && set +o verbose
-((DEBUG>2)) && set -o xtrace;  ((DEBUG<3)) && set +o xtrace
-((DEBUG>8)) && set -o noexec;  ((DEBUG<9)) && set +o noexec
-
-((DEBUG)) && VERBOSE=1 || VERBOSE=${VERBOSE:-$DEBUG}
 
 ((common_ERROR_TRAP)) && trap 'debugFunctionCalls $?' ERR   # dump function calls in case of error
 
@@ -547,7 +511,8 @@ function logWarning { _common_log "WARNING: ${@}"; }
 #
 # DESCRIPTION
 #	Wait for user reaction before continuing, optional time-out in seconds and
-#	prompt.
+#	prompt. Returns the pressed key, if any.
+#	If the "Q" key was pressed, the script execution quits.
 #
 # OPTIONS
 #	SECONDS  seconds to wait, or "-" to use TMOUT or default value (42s)
@@ -555,23 +520,31 @@ function logWarning { _common_log "WARNING: ${@}"; }
 #
 # AUTHOR
 #	Andreas Tusche <www.andreas-tusche.de>
-#====================================================================V.210514===
-# ToDo: exit on letters 'q'(quit) 'n'(no) 'x'(exit)
+#====================================================================V.211107===
 
 function pause() { # [SECONDS [PROMPT]] 
 	printDebug "${FUNCNAME}( $@ )"
+	local _KEY
 
 	if [[ "${1:--}" == "-" ]]; then
 		local _timeout=${TMOUT:-42}
 	else
 		local _timeout=${1:-${TMOUT:-42}} 
 	fi
-	((DEBUG)) && (( _timeout = 9 * _timeout + 42 ))
+	((DEBUG)) && (( _timeout = 9 * _timeout + 42 ))        # longer pause when debugging
 
-	echo -e "\033[01;30;103mPress any key to continue (${_timeout}s) Ctrl-C to stop)\033[01;05;30;103m:\033[0m"
-	read -n1 -r -s -t ${_timeout} ${2:+"-p$2 "}
+	if [[ "${2:--}" != "-" ]]; then
+		echo -e "\033[01;30;103m${2:-''}\033[0m"
+	fi 
+
+	while [ $_timeout -gt 0 ]; do
+		printf "\r\033[01;30;103mPress Q to quit, any other key to continue (%ds)\033[01;05;30;103m:\033[0m" $_timeout
+		_timeout=$(( _timeout - 1 ))
+		read -e -n1 -r -s -t1 _KEY && break
+	done
 	echo
-	return
+	case $_KEY in q|Q) trap - EXIT; exit $ERR_OK ;; esac
+	return ${_KEY:-0}
 }
 
 
@@ -621,7 +594,7 @@ function pause() { # [SECONDS [PROMPT]]
 # OPTIONS
 #	STRING  The string to be printed, prefixed by the current time and the
 #	word DEBUG, ERROR, INFO or WARNING.
-#  VARNAME  The name of the variable (without leading '$', of course)
+#	VARNAME  The name of the variable (without leading '$', of course)
 #   -1 FIRSTINDENT    - indent for first line
 #   -c NONPRIINTABLES - number of nonprintables in first line ("\033[" is one char)
 #   -i INDENT         - indent for 2nd and following lines
@@ -664,11 +637,6 @@ function printFolded() {
 #	((common_DEVELOP)) && echo "         1         2         3         4         5         6         7         8"
 #	((common_DEVELOP)) && echo "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
 
-	# TODO: find a better way for cursor position check
-	# start a new line if cursor is not at the beginning of line
-# 	IFS=';' read -sdR -p $'\E[6n' ROW COL 
-#	((COL>1)) && echo
-
 	# first line
 	echo -e "$s" \
 	| fold -sw$((L+C-F)) \
@@ -693,16 +661,16 @@ function printFolded() {
 # C: bright bg:  100 gray,  101 red, 102 green, 103 yellow, 104 blue,     105 magenta, 106 cyan,  107 white, 108 transparent
 
 function printDebug()    { ((DEBUG))   && printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;35mDEBUG  :\033[0;35m" "${@}\033[0m" >&2 ; }
-function printError()    {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;91mERROR  :\033[0;91m" "${@}\033[0m" ; }
+function printError()    {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;91mERROR  :\033[0;91m" "${@}\033[0m" >&2 ; }
 function printInfo()     {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;32mINFO   :\033[0;32m" "${@}\033[0m" ; }
 function printVerbose()  { ((VERBOSE)) && printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;32mINFO   :\033[0;32m" "${@}\033[0m" >&2 ; }
-function printWarning()  {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;33mWARNING:\033[0;33m" "${@}\033[0m" ; }
+function printWarning()  {                printFolded -c 12 -i 30 "$(date +'%F %T') \033[1;33mWARNING:\033[0;33m" "${@}\033[0m" >&2 ; }
 
 function printDebug2()   { ((DEBUG))   && printFolded -c  9 -1 29 -i 30 "\033[0;35m" "${@}\033[0m" >&2 ; }
-function printError2()   {                printFolded -c  9 -1 29 -i 30 "\033[0;91m" "${@}\033[0m" ; }
+function printError2()   {                printFolded -c  9 -1 29 -i 30 "\033[0;91m" "${@}\033[0m" >&2 ; }
 function printInfo2()    {                printFolded -c  9 -1 29 -i 30 "\033[0;32m" "${@}\033[0m" ; }
 function printVerbose2() { ((VERBOSE)) && printFolded -c  9 -1 29 -i 30 "\033[0;32m" "${@}\033[0m" >&2 ; }
-function printWarning2() {                printFolded -c  9 -1 29 -i 30 "\033[0;93m" "${@}\033[0m" ; }
+function printWarning2() {                printFolded -c  9 -1 29 -i 30 "\033[0;33m" "${@}\033[0m" >&2 ; }
 
 function printDebugArr() {
 	printDebug $(printf '"%s" ' "${@}")
@@ -723,6 +691,41 @@ function printToLog()    {
 	printVerbose ${@}
 	echo $(date +"%F %T%t") "${@}" >>"${LOGFILE}"
 }
+
+
+
+#===============================================================================
+# NAME
+#   printHelp - extract help text from first comment block of script
+#
+# SYNOPSIS
+#	printHelp [scriptname]
+#
+# AUTHOR
+#	Andreas Tusche <www.andreas-tusche.de>
+#====================================================================V.230410===
+
+function printHelp() {
+	printDebug "${FUNCNAME}( $@ )"
+	awk '
+		/^#[\t ]*NAME/                    {inBlock=1}      # start at NAME
+		/^#[\t ]*AUTHOR/                  {exit}           # stop  at AUTHOR 
+		/^#[\t ]*when[\t ]*who[\t ]*what/ {exit}           # stop latest here
+		inBlock==1 && /^#[-=#]/           {exit}
+		inBlock==1 && /^[^#]/             {exit}
+		inBlock==1 && /^#/                {
+			sub(/^# ?/,"")
+			gsub(/\t/,"    ")
+			if ($0 ~ /^[A-Z]+$/) {
+				print "\033[1m" $0 "\033[0m"               # bold headers
+			} else {
+				print
+			}
+		}
+	' "${1:-${_THIS_SCRIPT}}" >&2
+}
+
+
 
 #===============================================================================
 # ! DEPRECATED
@@ -871,6 +874,37 @@ function printTemplateFile { # FILENAME
 
 #===============================================================================
 # NAME
+#   printUsage - extract Synopsis text from first comment block of script
+#
+# SYNOPSIS
+#	printUsage [scriptname]
+#
+# AUTHOR
+#	Andreas Tusche <www.andreas-tusche.de>
+#====================================================================V.211107===
+
+function printUsage() {
+	printDebug "${FUNCNAME}( $@ )"
+	awk '
+		inBlock==1 && /^# [A-Z]/          {exit}
+		inBlock==1 && /^[^#]/             {exit}
+		inBlock==2 && /^#[\t ]*$/         {exit}
+		inBlock >0 && /^#/                {
+            inBlock=2
+			sub(/^# ?/,"")
+			gsub(/\t/,"    ")
+			print}
+		/^#[\t ]*SYNOPSIS/                {
+            inBlock=1
+            print "USAGE"
+            }
+	' "${1:-${_THIS_SCRIPT}}" >&2
+}
+
+
+
+#===============================================================================
+# NAME
 #	realpath - return absolute path
 #
 # SYNOPSIS
@@ -965,16 +999,16 @@ function rotateLog() { # FILE [NUMBER]
 		printf -v fOlder "%s.%02d" "${f}" ${j}
 
 		if [ -f "${fNew}" -a -f "${fOld}" ] ; then
-			mv "${fOld}" "${fOlder}"
+			/bin/mv "${fOld}" "${fOlder}"
 		fi
 	done
 
 	if [ -f "$f" ] ; then
 		if [ -f "$f.01" ] ; then
-			mv "${f}.01" "${f}.02"
+			/bin/mv "${f}.01" "${f}.02"
 		fi
 
-		mv "${f}" "${f}.01"
+		/bin/mv "${f}" "${f}.01"
 	fi
 
 	if [ -f "$fOldest" ] ; then
@@ -1071,11 +1105,13 @@ if [[ "${common_DEVELOP:-0}" == "0" ]]; then
 	declare -fr printError         
 	declare -fr printError2        
 	declare -fr printFolded        
+	declare -fr printHelp        
 	declare -fr printInfo          
 	declare -fr printInfo2         
 	declare -fr printStep          
 	declare -fr printTemplate      
 	declare -fr printTemplateFile  
+	declare -fr printUsage  
 	declare -fr printVerbose       
 	declare -fr printVerbose2      
 	declare -fr printWarning       
@@ -1086,7 +1122,6 @@ fi
 
 # Do not remove or alter the next line:
 common_lib_loaded=1; ((DEBUG)) && echo "]"
-
 ((common_DEVELOP)) || readonly common_lib_loaded
 return 0
 
