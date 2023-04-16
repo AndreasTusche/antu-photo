@@ -20,7 +20,7 @@ bin/**                    binary
 
 # Documents
 *.cfg                     text
-*.fmt                     text                             # XML Format
+*.fmt                     text
 *.html                    text diff=html
 *.log{.[0-9][0-9]}*       text
 *.md                      text diff=markdown
@@ -33,7 +33,7 @@ bin/**                    binary
 *.{svg,[Ss][Vv][Gg]}      text
 
 # Serialisation
-*.dop                     text                             # Jason Sidecar
+*.dop                     text
 *.json                    text
 *.xml                     text
 *.yaml                    text
