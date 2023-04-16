@@ -1,6 +1,54 @@
-*      text=auto
-*.bash text eol=lf
-*.bat  text eol=crlf
-*.cfg  text
-*.fmt  text
-*.md   text
+#
+#@ Pick the appropiate stuff from https://github.com/alexkaratarakis/gitattributes
+#
+
+# Auto detect text files and perform LF normalization
+*                         text=auto
+
+# Sources
+*.c                       text diff=cpp
+*.css                     text diff=css
+
+# Scripts
+*.bash                    text eol=lf
+*.{bat,[Bb][Aa][Tt]}      text eol=crlf
+*.{cmd,[Cc][Mm][Dd]}      text eol=crlf
+*.pl                      text diff=perl
+*.{sh,[Ss][Hh]}           text eol=lf
+*.{zsh,[Zz][Ss][Hh]}      text eol=lf
+bin/**                    binary
+
+# Documents
+*.cfg                     text
+*.fmt                     text                             # XML Format
+*.html                    text diff=html
+*.log{.[0-9][0-9]}*       text
+*.md                      text diff=markdown
+*.{pdf,[Pp][Dd][Ff]}           diff=astextplain
+*.{txt,[Tt][Xx][Tt]}      text
+
+# Graphics
+*.gv                      text
+*.{png,[Pp][Nn][Gg]}      binary
+*.{svg,[Ss][Vv][Gg]}      text
+
+# Serialisation
+*.dop                     text                             # Jason Sidecar
+*.json                    text
+*.xml                     text
+*.yaml                    text
+*.yml                     text
+
+# Archives
+*.tar                     binary
+
+# Special syntax highlighting 
+.gitattributes            linguist-language=gitattributes  
+*.md                      linguist-detectable
+
+# Exclude files from exporting
+.gitattributes            text export-ignore
+.gitignore                text export-ignore
+.gitkeep                  export-ignore
+unused/                   export-ignore
+
