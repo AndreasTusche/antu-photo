@@ -488,10 +488,10 @@ if ((STAGE_TWO)) ; then #@ ========================================= STAGE 2 ===
 					mv --backup=t -f "${file}" "${DIR_ERR%/}/"
 				fi
 			else
-				# 3.   If destination does not exist, copy current there but keep a copy for the next step
+				# 3.   If destination does not exist, move current there
 				printToLog "${file} copied to ${ddir}"
 				mkdir -p "${ddir}"
-				cp "${file}" "${ddir}"
+				mv "${file}" "${ddir}"
 			fi
 		fi
 	done
